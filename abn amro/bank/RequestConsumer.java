@@ -1,4 +1,4 @@
-package loanbroker;
+package bank;
 
 import com.google.gson.Gson;
 import com.rabbitmq.client.*;
@@ -9,19 +9,17 @@ import java.io.IOException;
 
 public class RequestConsumer {
 
-    private LoanBrokerFrame loanBrokerFrame;
     private ConnectionFactory connectionFactory;
 
     private static RequestConsumer instance = null;
 
-    private RequestConsumer(LoanBrokerFrame loanBrokerFrame) {
-        this.loanBrokerFrame = loanBrokerFrame;
+    private RequestConsumer() {
         this.connectionFactory = initConnectionFactory();
     }
 
-    public static RequestConsumer getInstance(LoanBrokerFrame loanBrokerFrame) {
+    public static RequestConsumer getInstance() {
         if (instance == null) {
-            instance = new RequestConsumer(loanBrokerFrame);
+            instance = new RequestConsumer();
         }
         return instance;
     }
@@ -46,14 +44,9 @@ public class RequestConsumer {
                 String message = new String(body, "UTF-8");
 
                 Gson gson = new Gson();
-                LoanRequest loanRequest = gson.fromJson(message, LoanRequest.class);
+                BankInterestRequest bankInterestRequest = gson.fromJson(message, BankInterestRequest.class);
 
-                loanBrokerFrame.add(loanRequest);
-
-                BankInterestRequest bankInterestRequest = new BankInterestRequest(loanRequest.getAmount(), loanRequest.getTime());
-                loanBrokerFrame.add(loanRequest, bankInterestRequest);
-
-                RequestProducer.getInstance().produce(bankInterestRequest, "interestRequest");
+                System.out.println(bankInterestRequest.getAmount());
             }
         };
     }

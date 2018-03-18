@@ -105,6 +105,4 @@ public class LoanBrokerFrame extends JFrame {
             list.repaint();
 		}		
 	}
-
-
 }
