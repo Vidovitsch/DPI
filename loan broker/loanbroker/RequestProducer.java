@@ -1,25 +1,19 @@
 package loanbroker;
 
+import Util.ConnectionFactoryProvider;
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import model.bank.BankInterestRequest;
-import model.loan.LoanRequest;
 
 import java.io.IOException;
 import java.util.UUID;
 
 public class RequestProducer {
 
-    private ConnectionFactory connectionFactory;
-
     private static RequestProducer instance;
-
-    private RequestProducer() {
-        this.connectionFactory = initConnectionFactory();
-    }
 
     public static RequestProducer getInstance() {
         if (instance == null) {
@@ -30,6 +24,8 @@ public class RequestProducer {
 
     public void produce(BankInterestRequest bankInterestRequest, String queueName) {
         try {
+            ConnectionFactory connectionFactory = ConnectionFactoryProvider.getInstance();
+
             Connection connection = connectionFactory.newConnection();
             Channel channel = connection.createChannel();
 
@@ -45,16 +41,5 @@ public class RequestProducer {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-    }
-
-    private ConnectionFactory initConnectionFactory() {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost("192.168.24.77");
-        connectionFactory.setUsername("guest");
-        connectionFactory.setPassword("guest");
-        connectionFactory.setPort(5672);
-        connectionFactory.setVirtualHost("/");
-
-        return connectionFactory;
     }
 }

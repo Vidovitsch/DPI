@@ -1,5 +1,6 @@
 package loanbroker;
 
+import Util.ConnectionFactoryProvider;
 import com.google.gson.Gson;
 import com.rabbitmq.client.*;
 import model.bank.BankInterestRequest;
@@ -10,13 +11,10 @@ import java.io.IOException;
 public class RequestConsumer {
 
     private LoanBrokerFrame loanBrokerFrame;
-    private ConnectionFactory connectionFactory;
-
     private static RequestConsumer instance = null;
 
     private RequestConsumer(LoanBrokerFrame loanBrokerFrame) {
         this.loanBrokerFrame = loanBrokerFrame;
-        this.connectionFactory = initConnectionFactory();
     }
 
     public static RequestConsumer getInstance(LoanBrokerFrame loanBrokerFrame) {
@@ -28,6 +26,7 @@ public class RequestConsumer {
 
     public void consume(String queueName) {
         try {
+            ConnectionFactory connectionFactory = ConnectionFactoryProvider.getInstance();
             Connection connection = connectionFactory.newConnection();
             Channel channel = connection.createChannel();
 
@@ -56,16 +55,5 @@ public class RequestConsumer {
                 RequestProducer.getInstance().produce(bankInterestRequest, "interestRequest");
             }
         };
-    }
-
-    private ConnectionFactory initConnectionFactory() {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost("192.168.24.77");
-        connectionFactory.setUsername("guest");
-        connectionFactory.setPassword("guest");
-        connectionFactory.setPort(5672);
-        connectionFactory.setVirtualHost("/");
-
-        return connectionFactory;
     }
 }

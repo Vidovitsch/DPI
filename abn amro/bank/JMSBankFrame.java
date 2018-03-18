@@ -18,6 +18,7 @@ import javax.swing.border.EmptyBorder;
 
 import model.bank.*;
 import messaging.requestreply.RequestReply;
+import model.loan.LoanRequest;
 
 public class JMSBankFrame extends JFrame {
 
@@ -113,5 +114,4 @@ public class JMSBankFrame extends JFrame {
 		gbc_btnSendReply.gridy = 1;
 		contentPane.add(btnSendReply, gbc_btnSendReply);
 	}
-
 }
