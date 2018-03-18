@@ -10,6 +10,8 @@ public class BankInterestRequest {
     private int amount; // the requested loan amount
     private int time; // the requested loan period
 
+    private String correlationId;
+
     public BankInterestRequest() {
         super();
         this.amount = 0;
@@ -37,6 +39,14 @@ public class BankInterestRequest {
 
     public void setTime(int time) {
         this.time = time;
+    }
+
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
     }
 
     @Override

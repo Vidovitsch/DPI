@@ -14,6 +14,8 @@ public class LoanRequest implements Serializable {
     private int amount; // the amount to borrow
     private int time; // the time-span of the loan
 
+    private String correlationId;
+
     public LoanRequest() {
         super();
         this.ssn = 0;
@@ -50,6 +52,14 @@ public class LoanRequest implements Serializable {
 
     public void setTime(int time) {
         this.time = time;
+    }
+
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
     }
 
     @Override

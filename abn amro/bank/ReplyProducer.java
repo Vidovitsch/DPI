@@ -1,45 +1,40 @@
-package loanclient;
+package bank;
 
 import Util.ConnectionFactoryProvider;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import model.loan.LoanRequest;
-
+import model.bank.BankInterestReply;
 
 import java.io.IOException;
 import java.util.UUID;
 
-public class RequestProducer {
+public class ReplyProducer {
 
-    private static RequestProducer instance;
+    private static ReplyProducer instance;
 
-    public static RequestProducer getInstance() {
+    public static ReplyProducer getInstance() {
         if (instance == null) {
-            instance = new RequestProducer();
+            instance = new ReplyProducer();
         }
         return instance;
     }
 
-    public void produce(LoanRequest request, String queueName) {
+    public void produce(BankInterestReply bankInterestReply, String queueName) {
         try {
             ConnectionFactory connectionFactory = ConnectionFactoryProvider.getInstance();
+
             Connection connection = connectionFactory.newConnection();
             Channel channel = connection.createChannel();
 
             channel.queueDeclare(queueName, false, false, false, null);
 
-            String correlationId = UUID.randomUUID().toString();
-            request.setCorrelationId(correlationId);
-
             Gson gson = new Gson();
-            String json = gson.toJson(request);
+            String json = gson.toJson(bankInterestReply);
 
-
-            channel.basicPublish("", queueName, new AMQP.BasicProperties().builder().correlationId(correlationId).build(), json.getBytes());
+            channel.basicPublish("", queueName, new AMQP.BasicProperties().builder().correlationId(UUID.randomUUID().toString()).build(), json.getBytes());
 
             channel.close();
             connection.close();

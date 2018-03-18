@@ -17,6 +17,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import messaging.requestreply.RequestReply;
+import model.bank.BankInterestReply;
 import model.loan.*;
 
 public class LoanClientFrame extends JFrame {
@@ -39,6 +40,8 @@ public class LoanClientFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public LoanClientFrame() {
+		ReplyConsumer.getInstance(this).consume("loanReply");
+
 		setTitle("Loan Client");
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -144,17 +147,36 @@ public class LoanClientFrame extends JFrame {
 	 * @param request
 	 * @return
 	 */
-   private RequestReply<LoanRequest,LoanReply> getRequestReply(LoanRequest request){    
-     
-     for (int i = 0; i < listModel.getSize(); i++){
-    	 RequestReply<LoanRequest,LoanReply> rr =listModel.get(i);
-    	 if (rr.getRequest() == request){
-    		 return rr;
-    	 }
-     }
-     
-     return null;
+   private RequestReply<LoanRequest,LoanReply> getRequestReply(LoanRequest request){
+
+	   for (int i = 0; i < listModel.getSize(); i++){
+		   RequestReply<LoanRequest,LoanReply> rr = listModel.get(i);
+		   if (rr.getRequest() == request){
+			   return rr;
+		   }
+	   }
+
+	   return null;
    }
+
+	public LoanRequest findCorrelatedRequest(String correlationId) {
+		for (int i = 0; i < listModel.getSize(); i++){
+			RequestReply<LoanRequest,LoanReply> rr =listModel.get(i);
+			if (rr.getRequest().getCorrelationId().equals(correlationId)){
+				return rr.getRequest();
+			}
+		}
+
+		return null;
+	}
+
+	public void add(LoanRequest loanRequest, LoanReply loanReply){
+		RequestReply<LoanRequest,LoanReply> rr = getRequestReply(loanRequest);
+		if (rr!= null && loanReply != null){
+			rr.setReply(loanReply);
+			requestReplyList.repaint();
+		}
+	}
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {

@@ -46,6 +46,7 @@ public class LoanBrokerFrame extends JFrame {
 	 */
 	public LoanBrokerFrame() {
 		RequestConsumer.getInstance(this).consume("loanRequest");
+		ReplyConsumer.getInstance(this).consume("interestReply");
 
 		setTitle("Loan Broker");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -101,8 +102,19 @@ public class LoanBrokerFrame extends JFrame {
 	public void add(LoanRequest loanRequest, BankInterestReply bankReply){
 		JListLine rr = getRequestReply(loanRequest);
 		if (rr!= null && bankReply != null){
-			rr.setBankReply(bankReply);;
+			rr.setBankReply(bankReply);
             list.repaint();
 		}		
+	}
+
+	public LoanRequest findCorrelatedRequest(String correlationId) {
+		for (int i = 0; i < listModel.getSize(); i++){
+			JListLine rr =listModel.get(i);
+			if (rr.getLoanRequest().getCorrelationId().equals(correlationId)){
+				return rr.getLoanRequest();
+			}
+		}
+
+		return null;
 	}
 }

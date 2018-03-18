@@ -50,6 +50,7 @@ public class RequestConsumer {
                 loanBrokerFrame.add(loanRequest);
 
                 BankInterestRequest bankInterestRequest = new BankInterestRequest(loanRequest.getAmount(), loanRequest.getTime());
+                bankInterestRequest.setCorrelationId(loanRequest.getCorrelationId());
                 loanBrokerFrame.add(loanRequest, bankInterestRequest);
 
                 RequestProducer.getInstance().produce(bankInterestRequest, "interestRequest");

@@ -50,7 +50,7 @@ public class JMSBankFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public JMSBankFrame() {
-		RequestConsumer.getInstance().consume("interestRequest");
+		RequestConsumer.getInstance(this).consume("interestRequest");
 
 		setTitle("ABN Amro");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -105,6 +105,8 @@ public class JMSBankFrame extends JFrame {
 					rr.setReply(reply);
 	                list.repaint();
 					// todo: sent JMS message with the reply to Loan Broker
+					reply.setCorrelationId(rr.getRequest().getCorrelationId());
+					ReplyProducer.getInstance().produce(reply, "interestReply");
 				}
 			}
 		});
@@ -113,5 +115,9 @@ public class JMSBankFrame extends JFrame {
 		gbc_btnSendReply.gridx = 4;
 		gbc_btnSendReply.gridy = 1;
 		contentPane.add(btnSendReply, gbc_btnSendReply);
+	}
+
+	public void add(BankInterestRequest loanRequest){
+		listModel.addElement(new RequestReply<>(loanRequest, null));
 	}
 }

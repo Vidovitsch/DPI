@@ -9,7 +9,9 @@ public class BankInterestReply {
 
     private double interest; // the loan interest
     private String bankId; // the nunique quote Id
-    
+
+    private String correlationId;
+
     public BankInterestReply() {
         this.interest = 0;
         this.bankId = "";
@@ -34,6 +36,14 @@ public class BankInterestReply {
 
     public void setQuoteId(String quoteId) {
         this.bankId = quoteId;
+    }
+
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
     }
 
     public String toString() {

@@ -1,27 +1,27 @@
-package bank;
+package loanbroker;
 
 import Util.ConnectionFactoryProvider;
 import com.google.gson.Gson;
 import com.rabbitmq.client.*;
+import model.bank.BankInterestReply;
 import model.bank.BankInterestRequest;
+import model.loan.LoanReply;
 import model.loan.LoanRequest;
-import sun.misc.Request;
 
 import java.io.IOException;
 
-public class RequestConsumer {
+public class ReplyConsumer {
 
-    private static RequestConsumer instance = null;
+    private LoanBrokerFrame loanBrokerFrame;
+    private static ReplyConsumer instance = null;
 
-    private JMSBankFrame bankFrame;
-
-    public RequestConsumer(JMSBankFrame bankFrame) {
-        this.bankFrame = bankFrame;
+    private ReplyConsumer(LoanBrokerFrame loanBrokerFrame) {
+        this.loanBrokerFrame = loanBrokerFrame;
     }
 
-    public static RequestConsumer getInstance(JMSBankFrame bankFrame) {
+    public static ReplyConsumer getInstance(LoanBrokerFrame loanBrokerFrame) {
         if (instance == null) {
-            instance = new RequestConsumer(bankFrame);
+            instance = new ReplyConsumer(loanBrokerFrame);
         }
         return instance;
     }
@@ -47,9 +47,14 @@ public class RequestConsumer {
                 String message = new String(body, "UTF-8");
 
                 Gson gson = new Gson();
-                BankInterestRequest bankInterestRequest = gson.fromJson(message, BankInterestRequest.class);
+                BankInterestReply bankReply = gson.fromJson(message, BankInterestReply.class);
+                LoanRequest loanRequest = loanBrokerFrame.findCorrelatedRequest(bankReply.getCorrelationId());
+                loanBrokerFrame.add(loanRequest, bankReply);
 
-                bankFrame.add(bankInterestRequest);
+                LoanReply loanReply = new LoanReply(bankReply.getInterest(), bankReply.getQuoteId());
+                loanReply.setCorrelationId(bankReply.getCorrelationId());
+
+                ReplyProducer.getInstance().produce(loanReply, "loanReply");
             }
         };
     }
