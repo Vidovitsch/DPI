@@ -32,6 +32,7 @@ public class LoanBrokerFrame extends JFrame {
 				try {
 					LoanBrokerFrame frame = new LoanBrokerFrame();
 					frame.setVisible(true);
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -44,6 +45,8 @@ public class LoanBrokerFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public LoanBrokerFrame() {
+		Consumer.getInstance(this).consume();
+
 		setTitle("Loan Broker");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -87,7 +90,7 @@ public class LoanBrokerFrame extends JFrame {
 	}
 	
 
-	public void add(LoanRequest loanRequest,BankInterestRequest bankRequest){
+	public void add(LoanRequest loanRequest, BankInterestRequest bankRequest){
 		JListLine rr = getRequestReply(loanRequest);
 		if (rr!= null && bankRequest != null){
 			rr.setBankRequest(bankRequest);
