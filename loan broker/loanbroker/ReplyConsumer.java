@@ -7,6 +7,7 @@ import model.bank.BankInterestReply;
 import model.bank.BankInterestRequest;
 import model.loan.LoanReply;
 import model.loan.LoanRequest;
+import services.GenericProducer;
 
 import java.io.IOException;
 
@@ -54,7 +55,7 @@ public class ReplyConsumer {
                 LoanReply loanReply = new LoanReply(bankReply.getInterest(), bankReply.getQuoteId());
                 loanReply.setCorrelationId(bankReply.getCorrelationId());
 
-                ReplyProducer.getInstance().produce(loanReply, "loanReply");
+                GenericProducer.getInstance().produce(loanReply, "loanReply");
             }
         };
     }

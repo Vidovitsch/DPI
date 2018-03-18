@@ -6,25 +6,15 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import model.bank.*;
 import messaging.requestreply.RequestReply;
-import model.loan.LoanRequest;
+import services.GenericProducer;
 
 public class JMSBankFrame extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField tfReply;
@@ -34,14 +24,12 @@ public class JMSBankFrame extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					JMSBankFrame frame = new JMSBankFrame();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+		EventQueue.invokeLater(() -> {
+			try {
+				JMSBankFrame frame = new JMSBankFrame();
+				frame.setVisible(true);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		});
 	}
@@ -49,11 +37,11 @@ public class JMSBankFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public JMSBankFrame() {
+	private JMSBankFrame() {
 		RequestConsumer.getInstance(this).consume("interestRequest");
 
-		setTitle("ABN Amro");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setTitle("ABN AMRO");
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -96,18 +84,16 @@ public class JMSBankFrame extends JFrame {
 		tfReply.setColumns(10);
 		
 		JButton btnSendReply = new JButton("send reply");
-		btnSendReply.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				RequestReply<BankInterestRequest, BankInterestReply> rr = list.getSelectedValue();
-				double interest = Double.parseDouble((tfReply.getText()));
-				BankInterestReply reply = new BankInterestReply(interest,"ABN AMRO");
-				if (rr!= null && reply != null){
-					rr.setReply(reply);
-	                list.repaint();
-					// todo: sent JMS message with the reply to Loan Broker
-					reply.setCorrelationId(rr.getRequest().getCorrelationId());
-					ReplyProducer.getInstance().produce(reply, "interestReply");
-				}
+		btnSendReply.addActionListener((ActionEvent e) -> {
+			RequestReply<BankInterestRequest, BankInterestReply> rr = list.getSelectedValue();
+			double interest = Double.parseDouble((tfReply.getText()));
+			BankInterestReply reply = new BankInterestReply(interest,"ABN AMRO");
+			if (rr!= null) {
+				rr.setReply(reply);
+				list.repaint();
+				reply.setCorrelationId(rr.getRequest().getCorrelationId());
+
+				GenericProducer.getInstance().produce(reply, "interestReply");
 			}
 		});
 		GridBagConstraints gbc_btnSendReply = new GridBagConstraints();

@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.*;
 import model.bank.BankInterestRequest;
 import model.loan.LoanRequest;
+import services.GenericProducer;
 
 import java.io.IOException;
 
@@ -53,7 +54,7 @@ public class RequestConsumer {
                 bankInterestRequest.setCorrelationId(loanRequest.getCorrelationId());
                 loanBrokerFrame.add(loanRequest, bankInterestRequest);
 
-                RequestProducer.getInstance().produce(bankInterestRequest, "interestRequest");
+                GenericProducer.getInstance().produce(bankInterestRequest, "interestRequest");
             }
         };
     }

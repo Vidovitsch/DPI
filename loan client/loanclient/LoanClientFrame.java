@@ -5,6 +5,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.UUID;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -19,6 +20,7 @@ import javax.swing.border.EmptyBorder;
 import messaging.requestreply.RequestReply;
 import model.bank.BankInterestReply;
 import model.loan.*;
+import services.GenericProducer;
 
 public class LoanClientFrame extends JFrame {
 
@@ -115,10 +117,11 @@ public class LoanClientFrame extends JFrame {
 				int time = Integer.parseInt(tfTime.getText());				
 				
 				LoanRequest request = new LoanRequest(ssn, amount, time);
+				request.setCorrelationId(UUID.randomUUID().toString());
+
 				listModel.addElement( new RequestReply<LoanRequest,LoanReply>(request, null));
 
-
-				RequestProducer.getInstance().produce(request, "loanRequest");
+				GenericProducer.getInstance().produce(request, "loanRequest");
 			}
 		});
 		GridBagConstraints gbc_btnQueue = new GridBagConstraints();
