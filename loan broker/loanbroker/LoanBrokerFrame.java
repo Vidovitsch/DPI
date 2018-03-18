@@ -45,7 +45,7 @@ public class LoanBrokerFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public LoanBrokerFrame() {
-		Consumer.getInstance(this).consume();
+		RequestConsumer.getInstance(this).consume("loanRequest");
 
 		setTitle("Loan Broker");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

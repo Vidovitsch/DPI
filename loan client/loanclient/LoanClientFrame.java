@@ -5,9 +5,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Properties;
 
-import javax.naming.Context;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -117,7 +115,7 @@ public class LoanClientFrame extends JFrame {
 				listModel.addElement( new RequestReply<LoanRequest,LoanReply>(request, null));
 
 
-				Producer.getInstance().produce(request, "loanRequest");
+				RequestProducer.getInstance().produce(request, "loanRequest");
 			}
 		});
 		GridBagConstraints gbc_btnQueue = new GridBagConstraints();

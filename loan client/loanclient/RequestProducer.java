@@ -1,6 +1,7 @@
 package loanclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -10,20 +11,19 @@ import model.loan.LoanRequest;
 import java.io.IOException;
 import java.util.UUID;
 
-public class Producer {
+public class RequestProducer {
 
     private ConnectionFactory connectionFactory;
 
+    private static RequestProducer instance;
 
-    private static Producer instance;
-
-    private Producer() {
+    private RequestProducer() {
         this.connectionFactory = initConnectionFactory();
     }
 
-    public static Producer getInstance() {
+    public static RequestProducer getInstance() {
         if (instance == null) {
-            instance = new Producer();
+            instance = new RequestProducer();
         }
         return instance;
     }
@@ -35,8 +35,8 @@ public class Producer {
 
             channel.queueDeclare(queueName, false, false, false, null);
 
-            ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(loanRequest);
+            Gson gson = new Gson();
+            String json = gson.toJson(loanRequest);
 
             channel.basicPublish("", queueName, new AMQP.BasicProperties().builder().correlationId(UUID.randomUUID().toString()).build(), json.getBytes());
 
