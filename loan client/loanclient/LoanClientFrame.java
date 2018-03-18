@@ -5,7 +5,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Properties;
 
+import javax.naming.Context;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -16,6 +18,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import messaging.requestreply.RequestReply;
 import model.loan.*;
@@ -116,8 +120,7 @@ public class LoanClientFrame extends JFrame {
 				listModel.addElement( new RequestReply<LoanRequest,LoanReply>(request, null));
 
 
-				// to do:  send the JMS with request to Loan Broker
-				
+				Producer.getInstance().produce(request, "test");
 			}
 		});
 		GridBagConstraints gbc_btnQueue = new GridBagConstraints();
