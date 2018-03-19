@@ -6,11 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.IOException;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import com.google.gson.Gson;
@@ -23,40 +19,34 @@ import models.loan.LoanRequest;
 import services.GenericConsumer;
 import services.GenericProducer;
 
-
 public class LoanBrokerFrame extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	private DefaultListModel<JListLine> listModel = new DefaultListModel<JListLine>();
+	private DefaultListModel<JListLine> listModel = new DefaultListModel<>();
 	private JList<JListLine> list;
-	
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					LoanBrokerFrame frame = new LoanBrokerFrame();
-					frame.setVisible(true);
 
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(() -> {
+			try {
+				LoanBrokerFrame frame = new LoanBrokerFrame();
+				frame.setVisible(true);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		});
 	}
-
 
 	/**
 	 * Create the frame.
 	 */
 	private LoanBrokerFrame() {
 		setTitle("Loan Broker");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
-		contentPane = new JPanel();
+		JPanel contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
@@ -75,19 +65,18 @@ public class LoanBrokerFrame extends JFrame {
 		gbc_scrollPane.gridy = 0;
 		contentPane.add(scrollPane, gbc_scrollPane);
 		
-		list = new JList<JListLine>(listModel);
+		list = new JList<>(listModel);
 		scrollPane.setViewportView(list);
 
 		// Start consuming
 		initConsumers();
 	}
 	
-	 private JListLine getRequestReply(LoanRequest request){    
-	     
-	     for (int i = 0; i < listModel.getSize(); i++){
-	    	 JListLine rr =listModel.get(i);
-	    	 if (rr.getLoanRequest() == request){
-	    		 return rr;
+	 private JListLine getRequestReply(LoanRequest request) {
+	     for (int i = 0; i < listModel.getSize(); i++) {
+	    	 JListLine listLine =listModel.get(i);
+	    	 if (listLine.getLoanRequest() == request) {
+	    		 return listLine;
 	    	 }
 	     }
 	     
@@ -98,28 +87,27 @@ public class LoanBrokerFrame extends JFrame {
 		listModel.addElement(new JListLine(loanRequest));		
 	}
 
-
-	private void add(LoanRequest loanRequest, BankInterestRequest bankRequest){
-		JListLine rr = getRequestReply(loanRequest);
-		if (rr!= null && bankRequest != null){
-			rr.setBankRequest(bankRequest);
+	private void add(LoanRequest loanRequest, BankInterestRequest bankRequest) {
+		JListLine listLine = getRequestReply(loanRequest);
+		if (listLine != null && bankRequest != null) {
+			listLine.setBankRequest(bankRequest);
             list.repaint();
 		}		
 	}
 
-	private void add(LoanRequest loanRequest, BankInterestReply bankReply){
-		JListLine rr = getRequestReply(loanRequest);
-		if (rr!= null && bankReply != null){
-			rr.setBankReply(bankReply);
+	private void add(LoanRequest loanRequest, BankInterestReply bankReply) {
+		JListLine listLine = getRequestReply(loanRequest);
+		if (listLine != null && bankReply != null) {
+			listLine.setBankReply(bankReply);
             list.repaint();
 		}		
 	}
 
 	private LoanRequest findCorrelatedRequest(String correlationId) {
-		for (int i = 0; i < listModel.getSize(); i++){
-			JListLine rr =listModel.get(i);
-			if (rr.getLoanRequest().getCorrelationId().equals(correlationId)){
-				return rr.getLoanRequest();
+		for (int i = 0; i < listModel.getSize(); i++) {
+			JListLine listLine =listModel.get(i);
+			if (listLine.getLoanRequest().getCorrelationId().equals(correlationId)) {
+				return listLine.getLoanRequest();
 			}
 		}
 
@@ -139,9 +127,13 @@ public class LoanBrokerFrame extends JFrame {
 				add(loanRequest);
 
 				BankInterestRequest bankInterestRequest = new BankInterestRequest(loanRequest.getAmount(), loanRequest.getTime());
+
+				// Pass correlation id
 				bankInterestRequest.setCorrelationId(loanRequest.getCorrelationId());
+
 				add(loanRequest, bankInterestRequest);
 
+				// Start producing
 				GenericProducer.getInstance().produce(bankInterestRequest, "interestRequest");
 			}
 		});
@@ -156,8 +148,11 @@ public class LoanBrokerFrame extends JFrame {
 				add(loanRequest, bankReply);
 
 				LoanReply loanReply = new LoanReply(bankReply.getInterest(), bankReply.getQuoteId());
+
+				// Pass correlation id
 				loanReply.setCorrelationId(bankReply.getCorrelationId());
 
+				// Start producing
 				GenericProducer.getInstance().produce(loanReply, "loanReply");
 			}
 		});

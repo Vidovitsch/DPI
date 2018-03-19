@@ -4,18 +4,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.UUID;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import com.google.gson.Gson;
@@ -29,28 +21,35 @@ import services.GenericProducer;
 
 public class LoanClientFrame extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
 	private JTextField tfSSN;
-	private DefaultListModel<RequestReply<LoanRequest,LoanReply>> listModel = new DefaultListModel<RequestReply<LoanRequest,LoanReply>>();
+	private DefaultListModel<RequestReply<LoanRequest,LoanReply>> listModel = new DefaultListModel<>();
 	private JList<RequestReply<LoanRequest,LoanReply>> requestReplyList;
-
 	private JTextField tfAmount;
-	private JLabel lblNewLabel;
-	private JLabel lblNewLabel_1;
 	private JTextField tfTime;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(() -> {
+			try {
+				LoanClientFrame frame = new LoanClientFrame();
+				frame.setVisible(true);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+	}
 
 	/**
 	 * Create the frame.
 	 */
-	public LoanClientFrame() {
+	private LoanClientFrame() {
 		setTitle("Loan Client");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 684, 619);
-		contentPane = new JPanel();
+		JPanel contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
@@ -75,8 +74,8 @@ public class LoanClientFrame extends JFrame {
 		gbc_tfSSN.gridy = 0;
 		contentPane.add(tfSSN, gbc_tfSSN);
 		tfSSN.setColumns(10);
-		
-		lblNewLabel = new JLabel("amount");
+
+		JLabel lblNewLabel = new JLabel("amount");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
@@ -94,7 +93,7 @@ public class LoanClientFrame extends JFrame {
 		contentPane.add(tfAmount, gbc_tfAmount);
 		tfAmount.setColumns(10);
 		
-		lblNewLabel_1 = new JLabel("time");
+		JLabel lblNewLabel_1 = new JLabel("time");
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
 		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
@@ -112,20 +111,22 @@ public class LoanClientFrame extends JFrame {
 		tfTime.setColumns(10);
 		
 		JButton btnQueue = new JButton("send loan request");
-		btnQueue.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				int ssn = Integer.parseInt(tfSSN.getText());
-				int amount = Integer.parseInt(tfAmount.getText());
-				int time = Integer.parseInt(tfTime.getText());				
-				
-				LoanRequest request = new LoanRequest(ssn, amount, time);
-				request.setCorrelationId(UUID.randomUUID().toString());
+		btnQueue.addActionListener((ActionEvent arg0) -> {
+			int ssn = Integer.parseInt(tfSSN.getText());
+			int amount = Integer.parseInt(tfAmount.getText());
+			int time = Integer.parseInt(tfTime.getText());
 
-				listModel.addElement( new RequestReply<LoanRequest,LoanReply>(request, null));
+			LoanRequest request = new LoanRequest(ssn, amount, time);
 
-				GenericProducer.getInstance().produce(request, "loanRequest");
-			}
+			// Pass correlation id
+			request.setCorrelationId(UUID.randomUUID().toString());
+
+			listModel.addElement( new RequestReply<>(request, null));
+
+			// Start producing
+			GenericProducer.getInstance().produce(request, "loanRequest");
 		});
+
 		GridBagConstraints gbc_btnQueue = new GridBagConstraints();
 		gbc_btnQueue.insets = new Insets(0, 0, 5, 5);
 		gbc_btnQueue.gridx = 2;
@@ -141,62 +142,41 @@ public class LoanClientFrame extends JFrame {
 		gbc_scrollPane.gridy = 4;
 		contentPane.add(scrollPane, gbc_scrollPane);
 		
-		requestReplyList = new JList<RequestReply<LoanRequest,LoanReply>>(listModel);
+		requestReplyList = new JList<>(listModel);
 		scrollPane.setViewportView(requestReplyList);
 
 		// Start consuming
 		initConsumers();
 	}
-	
-	/**
-	 * This method returns the RequestReply line that belongs to the request from requestReplyList (JList). 
-	 * You can call this method when an reply arrives in order to add this reply to the right request in requestReplyList.
-	 * @param request
-	 * @return
-	 */
-   private RequestReply<LoanRequest,LoanReply> getRequestReply(LoanRequest request){
 
-	   for (int i = 0; i < listModel.getSize(); i++){
-		   RequestReply<LoanRequest,LoanReply> rr = listModel.get(i);
-		   if (rr.getRequest() == request){
-			   return rr;
+   private RequestReply<LoanRequest,LoanReply> getRequestReply(LoanRequest request) {
+	   for (int i = 0; i < listModel.getSize(); i++) {
+		   RequestReply<LoanRequest,LoanReply> requestReply = listModel.get(i);
+		   if (requestReply.getRequest() == request) {
+			   return requestReply;
 		   }
 	   }
 
 	   return null;
    }
 
-	public LoanRequest findCorrelatedRequest(String correlationId) {
-		for (int i = 0; i < listModel.getSize(); i++){
-			RequestReply<LoanRequest,LoanReply> rr =listModel.get(i);
-			if (rr.getRequest().getCorrelationId().equals(correlationId)){
-				return rr.getRequest();
+	private LoanRequest findCorrelatedRequest(String correlationId) {
+		for (int i = 0; i < listModel.getSize(); i++) {
+			RequestReply<LoanRequest,LoanReply> requestReply =listModel.get(i);
+			if (requestReply.getRequest().getCorrelationId().equals(correlationId)) {
+				return requestReply.getRequest();
 			}
 		}
 
 		return null;
 	}
 
-	public void add(LoanRequest loanRequest, LoanReply loanReply){
-		RequestReply<LoanRequest,LoanReply> rr = getRequestReply(loanRequest);
-		if (rr!= null && loanReply != null){
-			rr.setReply(loanReply);
+	private void add(LoanRequest loanRequest, LoanReply loanReply) {
+		RequestReply<LoanRequest,LoanReply> requestReply = getRequestReply(loanRequest);
+		if (requestReply != null && loanReply != null) {
+			requestReply.setReply(loanReply);
 			requestReplyList.repaint();
 		}
-	}
-	
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					LoanClientFrame frame = new LoanClientFrame();
-					
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
 	}
 
 	private void initConsumers() {

@@ -21,9 +21,8 @@ import services.GenericProducer;
 public class JMSBankFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
 	private JTextField tfReply;
-	private DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>>();
+	private DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<>();
 	
 	/**
 	 * Launch the application.
@@ -46,7 +45,7 @@ public class JMSBankFrame extends JFrame {
 		setTitle("ABN AMRO");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
-		contentPane = new JPanel();
+		JPanel contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
@@ -65,7 +64,7 @@ public class JMSBankFrame extends JFrame {
 		gbc_scrollPane.gridy = 0;
 		contentPane.add(scrollPane, gbc_scrollPane);
 		
-		JList<RequestReply<BankInterestRequest, BankInterestReply>> list = new JList<RequestReply<BankInterestRequest, BankInterestReply>>(listModel);
+		JList<RequestReply<BankInterestRequest, BankInterestReply>> list = new JList<>(listModel);
 		scrollPane.setViewportView(list);
 		
 		JLabel lblNewLabel = new JLabel("type reply");
@@ -94,8 +93,11 @@ public class JMSBankFrame extends JFrame {
 			if (rr!= null) {
 				rr.setReply(reply);
 				list.repaint();
+
+				// Pass correlation id
 				reply.setCorrelationId(rr.getRequest().getCorrelationId());
 
+				// Start producing
 				GenericProducer.getInstance().produce(reply, "interestReply");
 			}
 		});
@@ -109,7 +111,7 @@ public class JMSBankFrame extends JFrame {
 		initConsumers();
 	}
 
-	public void add(BankInterestRequest loanRequest){
+	private void add(BankInterestRequest loanRequest){
 		listModel.addElement(new RequestReply<>(loanRequest, null));
 	}
 
