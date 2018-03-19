@@ -4,7 +4,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import javax.swing.*;
@@ -14,8 +13,8 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
-import model.bank.*;
-import messaging.requestreply.RequestReply;
+import models.bank.*;
+import models.messaging.RequestReply;
 import services.GenericConsumer;
 import services.GenericProducer;
 

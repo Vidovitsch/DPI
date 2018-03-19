@@ -22,10 +22,8 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
-import messaging.requestreply.RequestReply;
-import model.bank.BankInterestReply;
-import model.bank.BankInterestRequest;
-import model.loan.*;
+import models.messaging.RequestReply;
+import models.loan.*;
 import services.GenericConsumer;
 import services.GenericProducer;
 

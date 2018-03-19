@@ -17,9 +17,9 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
-import model.bank.*;
-import model.loan.LoanReply;
-import model.loan.LoanRequest;
+import models.bank.*;
+import models.loan.LoanReply;
+import models.loan.LoanRequest;
 import services.GenericConsumer;
 import services.GenericProducer;
 
@@ -52,7 +52,7 @@ public class LoanBrokerFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public LoanBrokerFrame() {
+	private LoanBrokerFrame() {
 		setTitle("Loan Broker");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -93,21 +93,21 @@ public class LoanBrokerFrame extends JFrame {
 	     
 	     return null;
 	   }
-	
-	public void add(LoanRequest loanRequest){		
+
+	private void add(LoanRequest loanRequest){
 		listModel.addElement(new JListLine(loanRequest));		
 	}
-	
 
-	public void add(LoanRequest loanRequest, BankInterestRequest bankRequest){
+
+	private void add(LoanRequest loanRequest, BankInterestRequest bankRequest){
 		JListLine rr = getRequestReply(loanRequest);
 		if (rr!= null && bankRequest != null){
 			rr.setBankRequest(bankRequest);
             list.repaint();
 		}		
 	}
-	
-	public void add(LoanRequest loanRequest, BankInterestReply bankReply){
+
+	private void add(LoanRequest loanRequest, BankInterestReply bankReply){
 		JListLine rr = getRequestReply(loanRequest);
 		if (rr!= null && bankReply != null){
 			rr.setBankReply(bankReply);
@@ -115,7 +115,7 @@ public class LoanBrokerFrame extends JFrame {
 		}		
 	}
 
-	public LoanRequest findCorrelatedRequest(String correlationId) {
+	private LoanRequest findCorrelatedRequest(String correlationId) {
 		for (int i = 0; i < listModel.getSize(); i++){
 			JListLine rr =listModel.get(i);
 			if (rr.getLoanRequest().getCorrelationId().equals(correlationId)){

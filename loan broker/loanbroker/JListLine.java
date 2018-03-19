@@ -1,7 +1,7 @@
 package loanbroker;
 
-import model.loan.*;
-import model.bank.*;
+import models.loan.*;
+import models.bank.*;
 
 /**
  * This class represents one line in the JList in Loan Broker.
