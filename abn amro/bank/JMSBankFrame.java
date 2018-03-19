@@ -4,43 +4,36 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.IOException;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import model.bank.*;
-import messaging.requestreply.RequestReply;
+import com.google.gson.Gson;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
+import models.bank.*;
+import models.messaging.RequestReply;
+import services.GenericConsumer;
+import services.GenericProducer;
 
 public class JMSBankFrame extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
 	private JTextField tfReply;
-	private DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>>();
+	private DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<>();
 	
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					JMSBankFrame frame = new JMSBankFrame();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+		EventQueue.invokeLater(() -> {
+			try {
+				JMSBankFrame frame = new JMSBankFrame();
+				frame.setVisible(true);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		});
 	}
@@ -48,11 +41,11 @@ public class JMSBankFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public JMSBankFrame() {
-		setTitle("JMS Bank - ABN AMRO");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	private JMSBankFrame() {
+		setTitle("ABN AMRO");
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
-		contentPane = new JPanel();
+		JPanel contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
@@ -71,7 +64,7 @@ public class JMSBankFrame extends JFrame {
 		gbc_scrollPane.gridy = 0;
 		contentPane.add(scrollPane, gbc_scrollPane);
 		
-		JList<RequestReply<BankInterestRequest, BankInterestReply>> list = new JList<RequestReply<BankInterestRequest, BankInterestReply>>(listModel);
+		JList<RequestReply<BankInterestRequest, BankInterestReply>> list = new JList<>(listModel);
 		scrollPane.setViewportView(list);
 		
 		JLabel lblNewLabel = new JLabel("type reply");
@@ -93,16 +86,19 @@ public class JMSBankFrame extends JFrame {
 		tfReply.setColumns(10);
 		
 		JButton btnSendReply = new JButton("send reply");
-		btnSendReply.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				RequestReply<BankInterestRequest, BankInterestReply> rr = list.getSelectedValue();
-				double interest = Double.parseDouble((tfReply.getText()));
-				BankInterestReply reply = new BankInterestReply(interest,"ABN AMRO");
-				if (rr!= null && reply != null){
-					rr.setReply(reply);
-	                list.repaint();
-					// todo: sent JMS message with the reply to Loan Broker
-				}
+		btnSendReply.addActionListener((ActionEvent e) -> {
+			RequestReply<BankInterestRequest, BankInterestReply> rr = list.getSelectedValue();
+			double interest = Double.parseDouble((tfReply.getText()));
+			BankInterestReply reply = new BankInterestReply(interest,"ABN AMRO");
+			if (rr!= null) {
+				rr.setReply(reply);
+				list.repaint();
+
+				// Pass correlation id
+				reply.setCorrelationId(rr.getRequest().getCorrelationId());
+
+				// Start producing
+				GenericProducer.getInstance().produce(reply, "interestReply");
 			}
 		});
 		GridBagConstraints gbc_btnSendReply = new GridBagConstraints();
@@ -110,6 +106,27 @@ public class JMSBankFrame extends JFrame {
 		gbc_btnSendReply.gridx = 4;
 		gbc_btnSendReply.gridy = 1;
 		contentPane.add(btnSendReply, gbc_btnSendReply);
+
+		// Start consuming
+		initConsumers();
 	}
 
+	private void add(BankInterestRequest loanRequest){
+		listModel.addElement(new RequestReply<>(loanRequest, null));
+	}
+
+	private void initConsumers() {
+		GenericConsumer genericConsumer = GenericConsumer.getInstance();
+		genericConsumer.consume("interestRequest", new DefaultConsumer(genericConsumer.getChannel()) {
+			@Override
+			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+				String message = new String(body, "UTF-8");
+
+				Gson gson = new Gson();
+				BankInterestRequest bankInterestRequest = gson.fromJson(message, BankInterestRequest.class);
+
+				add(bankInterestRequest);
+			}
+		});
+	}
 }

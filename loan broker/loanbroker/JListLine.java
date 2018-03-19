@@ -1,7 +1,7 @@
 package loanbroker;
 
-import model.loan.*;
-import model.bank.*;
+import models.loan.*;
+import models.bank.*;
 
 /**
  * This class represents one line in the JList in Loan Broker.
@@ -20,7 +20,7 @@ class JListLine {
 	private BankInterestRequest bankRequest;
 	private BankInterestReply bankReply;
 
-	public JListLine(LoanRequest loanRequest) {
+	JListLine(LoanRequest loanRequest) {
 		this.setLoanRequest(loanRequest);
 	}
 
@@ -28,7 +28,7 @@ class JListLine {
 		return loanRequest;
 	}
 
-	public void setLoanRequest(LoanRequest loanRequest) {
+	private void setLoanRequest(LoanRequest loanRequest) {
 		this.loanRequest = loanRequest;
 	}
 
@@ -52,5 +52,4 @@ class JListLine {
 	public String toString() {
 		return loanRequest.toString() + " || " + ((bankReply != null) ? bankReply.toString() : "waiting for reply...");
 	}
-
 }
