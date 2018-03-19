@@ -1,4 +1,4 @@
-package loanbroker;
+package applications.Loan_Broker;
 
 import models.loan.*;
 import models.bank.*;

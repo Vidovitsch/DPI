@@ -1,4 +1,5 @@
-package bank;
+package applications.ABN_AMRO;
+
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

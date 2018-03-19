@@ -1,4 +1,4 @@
-package loanbroker;
+package applications.Loan_Broker;
 
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
