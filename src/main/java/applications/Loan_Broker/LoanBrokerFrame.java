@@ -148,7 +148,7 @@ public class LoanBrokerFrame extends JFrame {
 				LoanRequest loanRequest = findCorrelatedRequest(bankReply.getCorrelationId());
 				add(loanRequest, bankReply);
 
-				LoanReply loanReply = new LoanReply(bankReply.getInterest(), bankReply.getQuoteId());
+				LoanReply loanReply = new LoanReply(bankReply.getInterest(), bankReply.getBankId());
 
 				// Pass correlation id
 				CorrelationManager.correlate(bankReply, loanReply);

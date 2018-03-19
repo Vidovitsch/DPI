@@ -27,12 +27,12 @@ public class BankInterestReply implements Correlatable {
         this.interest = interest;
     }
 
-    public String getQuoteId() {
+    public String getBankId() {
         return bankId;
     }
 
-    public void setQuoteId(String quoteId) {
-        this.bankId = quoteId;
+    public void setBankId(String bankId) {
+        this.bankId = bankId;
     }
 
     @Override
