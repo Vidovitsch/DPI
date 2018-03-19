@@ -1,11 +1,13 @@
 package models.bank;
 
+import correlation.Correlatable;
+
 /**
  * This class stores information about the bank reply
  *  to a loan request of the specific client
  * 
  */
-public class BankInterestReply {
+public class BankInterestReply implements Correlatable {
 
     private double interest; // the loan interest
     private String bankId; // the nunique quote Id
@@ -25,18 +27,20 @@ public class BankInterestReply {
         this.interest = interest;
     }
 
-    public String getQuoteId() {
+    public String getBankId() {
         return bankId;
     }
 
-    public void setQuoteId(String quoteId) {
-        this.bankId = quoteId;
+    public void setBankId(String bankId) {
+        this.bankId = bankId;
     }
 
+    @Override
     public String getCorrelationId() {
         return correlationId;
     }
 
+    @Override
     public void setCorrelationId(String correlationId) {
         this.correlationId = correlationId;
     }

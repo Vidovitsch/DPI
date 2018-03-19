@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+import correlation.CorrelationManager;
 import models.bank.*;
 import models.messaging.RequestReply;
 import services.GenericConsumer;
@@ -96,7 +97,7 @@ public class JMSBankFrame extends JFrame {
 				list.repaint();
 
 				// Pass correlation id
-				reply.setCorrelationId(rr.getRequest().getCorrelationId());
+				CorrelationManager.correlate(rr.getRequest(), reply);
 
 				// Start producing
 				GenericProducer.getInstance().produce(reply, "interestReply");

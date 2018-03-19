@@ -1,12 +1,14 @@
 package models.loan;
 
+import correlation.Correlatable;
+
 /**
  *
  * This class stores all information about a
  * request that a client submits to get a loan.
  *
  */
-public class LoanRequest {
+public class LoanRequest implements Correlatable {
 
     private int ssn; // unique client number.
     private int amount; // the amount to borrow
@@ -45,10 +47,12 @@ public class LoanRequest {
         this.time = time;
     }
 
+    @Override
     public String getCorrelationId() {
         return correlationId;
     }
 
+    @Override
     public void setCorrelationId(String correlationId) {
         this.correlationId = correlationId;
     }

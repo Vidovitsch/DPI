@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+import correlation.CorrelationManager;
 import models.messaging.RequestReply;
 import models.loan.*;
 import services.GenericConsumer;
@@ -120,7 +121,7 @@ public class LoanClientFrame extends JFrame {
 			LoanRequest request = new LoanRequest(ssn, amount, time);
 
 			// Pass correlation id
-			request.setCorrelationId(UUID.randomUUID().toString());
+			CorrelationManager.setUUID(request);
 
 			listModel.addElement( new RequestReply<>(request, null));
 

@@ -1,11 +1,13 @@
 package models.bank;
 
+import correlation.Correlatable;
+
 /**
  *
  * This class stores all information about an request from a bank to offer
  * a loan to a specific client.
  */
-public class BankInterestRequest {
+public class BankInterestRequest implements Correlatable {
 
     private int amount; // the requested loan amount
     private int time; // the requested loan period
@@ -35,10 +37,12 @@ public class BankInterestRequest {
         this.time = time;
     }
 
+    @Override
     public String getCorrelationId() {
         return correlationId;
     }
 
+    @Override
     public void setCorrelationId(String correlationId) {
         this.correlationId = correlationId;
     }
