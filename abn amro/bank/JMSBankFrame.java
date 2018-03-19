@@ -5,12 +5,18 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import com.google.gson.Gson;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import model.bank.*;
 import messaging.requestreply.RequestReply;
+import services.GenericConsumer;
 import services.GenericProducer;
 
 public class JMSBankFrame extends JFrame {
@@ -38,8 +44,6 @@ public class JMSBankFrame extends JFrame {
 	 * Create the frame.
 	 */
 	private JMSBankFrame() {
-		RequestConsumer.getInstance(this).consume("interestRequest");
-
 		setTitle("ABN AMRO");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -101,9 +105,27 @@ public class JMSBankFrame extends JFrame {
 		gbc_btnSendReply.gridx = 4;
 		gbc_btnSendReply.gridy = 1;
 		contentPane.add(btnSendReply, gbc_btnSendReply);
+
+		// Start consuming
+		initConsumers();
 	}
 
 	public void add(BankInterestRequest loanRequest){
 		listModel.addElement(new RequestReply<>(loanRequest, null));
+	}
+
+	private void initConsumers() {
+		GenericConsumer genericConsumer = GenericConsumer.getInstance();
+		genericConsumer.consume("interestRequest", new DefaultConsumer(genericConsumer.getChannel()) {
+			@Override
+			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+				String message = new String(body, "UTF-8");
+
+				Gson gson = new Gson();
+				BankInterestRequest bankInterestRequest = gson.fromJson(message, BankInterestRequest.class);
+
+				add(bankInterestRequest);
+			}
+		});
 	}
 }

@@ -5,6 +5,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.UUID;
 
 import javax.swing.DefaultListModel;
@@ -17,9 +18,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
+import com.google.gson.Gson;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import messaging.requestreply.RequestReply;
 import model.bank.BankInterestReply;
+import model.bank.BankInterestRequest;
 import model.loan.*;
+import services.GenericConsumer;
 import services.GenericProducer;
 
 public class LoanClientFrame extends JFrame {
@@ -42,10 +49,7 @@ public class LoanClientFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public LoanClientFrame() {
-		ReplyConsumer.getInstance(this).consume("loanReply");
-
 		setTitle("Loan Client");
-		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 684, 619);
 		contentPane = new JPanel();
@@ -140,8 +144,10 @@ public class LoanClientFrame extends JFrame {
 		contentPane.add(scrollPane, gbc_scrollPane);
 		
 		requestReplyList = new JList<RequestReply<LoanRequest,LoanReply>>(listModel);
-		scrollPane.setViewportView(requestReplyList);	
-       
+		scrollPane.setViewportView(requestReplyList);
+
+		// Start consuming
+		initConsumers();
 	}
 	
 	/**
@@ -191,6 +197,21 @@ public class LoanClientFrame extends JFrame {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+			}
+		});
+	}
+
+	private void initConsumers() {
+		GenericConsumer genericConsumer = GenericConsumer.getInstance();
+		genericConsumer.consume("loanReply", new DefaultConsumer(genericConsumer.getChannel()) {
+			@Override
+			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+				String message = new String(body, "UTF-8");
+
+				Gson gson = new Gson();
+				LoanReply loanReply = gson.fromJson(message, LoanReply.class);
+				LoanRequest loanRequest = findCorrelatedRequest(loanReply.getCorrelationId());
+				add(loanRequest, loanReply);
 			}
 		});
 	}

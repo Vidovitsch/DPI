@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.io.IOException;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
@@ -12,8 +13,15 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
+import com.google.gson.Gson;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import model.bank.*;
+import model.loan.LoanReply;
 import model.loan.LoanRequest;
+import services.GenericConsumer;
+import services.GenericProducer;
 
 
 public class LoanBrokerFrame extends JFrame {
@@ -45,9 +53,6 @@ public class LoanBrokerFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public LoanBrokerFrame() {
-		RequestConsumer.getInstance(this).consume("loanRequest");
-		ReplyConsumer.getInstance(this).consume("interestReply");
-
 		setTitle("Loan Broker");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -71,7 +76,10 @@ public class LoanBrokerFrame extends JFrame {
 		contentPane.add(scrollPane, gbc_scrollPane);
 		
 		list = new JList<JListLine>(listModel);
-		scrollPane.setViewportView(list);		
+		scrollPane.setViewportView(list);
+
+		// Start consuming
+		initConsumers();
 	}
 	
 	 private JListLine getRequestReply(LoanRequest request){    
@@ -116,5 +124,42 @@ public class LoanBrokerFrame extends JFrame {
 		}
 
 		return null;
+	}
+
+	private void initConsumers() {
+		GenericConsumer genericConsumer = GenericConsumer.getInstance();
+		genericConsumer.consume("loanRequest", new DefaultConsumer(genericConsumer.getChannel()) {
+			@Override
+			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+				String message = new String(body, "UTF-8");
+
+				Gson gson = new Gson();
+				LoanRequest loanRequest = gson.fromJson(message, LoanRequest.class);
+
+				add(loanRequest);
+
+				BankInterestRequest bankInterestRequest = new BankInterestRequest(loanRequest.getAmount(), loanRequest.getTime());
+				bankInterestRequest.setCorrelationId(loanRequest.getCorrelationId());
+				add(loanRequest, bankInterestRequest);
+
+				GenericProducer.getInstance().produce(bankInterestRequest, "interestRequest");
+			}
+		});
+		genericConsumer.consume("interestReply", new DefaultConsumer(genericConsumer.getChannel()) {
+			@Override
+			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+				String message = new String(body, "UTF-8");
+
+				Gson gson = new Gson();
+				BankInterestReply bankReply = gson.fromJson(message, BankInterestReply.class);
+				LoanRequest loanRequest = findCorrelatedRequest(bankReply.getCorrelationId());
+				add(loanRequest, bankReply);
+
+				LoanReply loanReply = new LoanReply(bankReply.getInterest(), bankReply.getQuoteId());
+				loanReply.setCorrelationId(bankReply.getCorrelationId());
+
+				GenericProducer.getInstance().produce(loanReply, "loanReply");
+			}
+		});
 	}
 }
