@@ -30,6 +30,8 @@ public class LoanClientFrame extends JFrame {
 	private JTextField tfAmount;
 	private JTextField tfTime;
 
+	private static String ssn;
+
 	/**
 	 * Launch the application.
 	 */
@@ -42,6 +44,19 @@ public class LoanClientFrame extends JFrame {
 				e.printStackTrace();
 			}
 		});
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                try {
+                    if (ssn != null) {
+                        GenericConsumer.getInstance().getChannel().queueDelete(ssn);
+                    }
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        });
 	}
 
 	/**
@@ -94,7 +109,7 @@ public class LoanClientFrame extends JFrame {
 		gbc_tfAmount.gridy = 1;
 		contentPane.add(tfAmount, gbc_tfAmount);
 		tfAmount.setColumns(10);
-		
+
 		JLabel lblNewLabel_1 = new JLabel("time");
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
 		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
@@ -117,6 +132,16 @@ public class LoanClientFrame extends JFrame {
 			int ssn = Integer.parseInt(tfSSN.getText());
 			int amount = Integer.parseInt(tfAmount.getText());
 			int time = Integer.parseInt(tfTime.getText());
+
+			try {
+                initConsumers(String.valueOf(ssn));
+                if (LoanClientFrame.ssn != null && !LoanClientFrame.ssn.equals(String.valueOf(ssn))) {
+                    GenericConsumer.getInstance().getChannel().queueDelete(LoanClientFrame.ssn);
+                }
+                LoanClientFrame.ssn = String.valueOf(ssn);
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
 
 			LoanRequest request = new LoanRequest(ssn, amount, time);
 
@@ -146,9 +171,6 @@ public class LoanClientFrame extends JFrame {
 		
 		requestReplyList = new JList<>(listModel);
 		scrollPane.setViewportView(requestReplyList);
-
-		// Start consuming
-		initConsumers();
 	}
 
    private RequestReply<LoanRequest,LoanReply> getRequestReply(LoanRequest request) {
@@ -181,9 +203,9 @@ public class LoanClientFrame extends JFrame {
 		}
 	}
 
-	private void initConsumers() {
+	private void initConsumers(String ssn) {
 		GenericConsumer genericConsumer = GenericConsumer.getInstance();
-		genericConsumer.consume("loanReply", new DefaultConsumer(genericConsumer.getChannel()) {
+		genericConsumer.consume(ssn, new DefaultConsumer(genericConsumer.getChannel()) {
 			@Override
 			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 				String message = new String(body, "UTF-8");

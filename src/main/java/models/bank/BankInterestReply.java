@@ -13,7 +13,7 @@ public class BankInterestReply implements Correlatable {
     private String bankId; // the nunique quote Id
 
     private String correlationId;
-    
+
     public BankInterestReply(double interest, String quoteId) {
         this.interest = interest;
         this.bankId = quoteId;

@@ -154,7 +154,7 @@ public class LoanBrokerFrame extends JFrame {
 				CorrelationManager.correlate(bankReply, loanReply);
 
 				// Start producing
-				GenericProducer.getInstance().produce(loanReply, "loanReply");
+				GenericProducer.getInstance().produce(loanReply, String.valueOf(loanRequest.getSsn()));
 			}
 		});
 	}
