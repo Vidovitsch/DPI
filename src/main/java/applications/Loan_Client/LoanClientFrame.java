@@ -1,4 +1,5 @@
-package loanclient;
+package applications.Loan_Client;
+
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -23,8 +24,8 @@ public class LoanClientFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField tfSSN;
-	private DefaultListModel<RequestReply<LoanRequest,LoanReply>> listModel = new DefaultListModel<>();
-	private JList<RequestReply<LoanRequest,LoanReply>> requestReplyList;
+	private DefaultListModel<RequestReply<LoanRequest, LoanReply>> listModel = new DefaultListModel<>();
+	private JList<RequestReply<LoanRequest, LoanReply>> requestReplyList;
 	private JTextField tfAmount;
 	private JTextField tfTime;
 
@@ -110,7 +111,7 @@ public class LoanClientFrame extends JFrame {
 		contentPane.add(tfTime, gbc_tfTime);
 		tfTime.setColumns(10);
 		
-		JButton btnQueue = new JButton("send loan request");
+		JButton btnQueue = new JButton("send models.loan request");
 		btnQueue.addActionListener((ActionEvent arg0) -> {
 			int ssn = Integer.parseInt(tfSSN.getText());
 			int amount = Integer.parseInt(tfAmount.getText());
