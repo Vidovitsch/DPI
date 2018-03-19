@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+import correlation.CorrelationManager;
 import models.bank.*;
 import models.loan.LoanReply;
 import models.loan.LoanRequest;
@@ -129,7 +130,7 @@ public class LoanBrokerFrame extends JFrame {
 				BankInterestRequest bankInterestRequest = new BankInterestRequest(loanRequest.getAmount(), loanRequest.getTime());
 
 				// Pass correlation id
-				bankInterestRequest.setCorrelationId(loanRequest.getCorrelationId());
+				CorrelationManager.correlate(loanRequest, bankInterestRequest);
 
 				add(loanRequest, bankInterestRequest);
 
@@ -150,7 +151,7 @@ public class LoanBrokerFrame extends JFrame {
 				LoanReply loanReply = new LoanReply(bankReply.getInterest(), bankReply.getQuoteId());
 
 				// Pass correlation id
-				loanReply.setCorrelationId(bankReply.getCorrelationId());
+				CorrelationManager.correlate(bankReply, loanReply);
 
 				// Start producing
 				GenericProducer.getInstance().produce(loanReply, "loanReply");

@@ -1,11 +1,13 @@
 package models.loan;
 
+import correlation.Correlatable;
+
 /**
  *
  * This class stores all information about a bank offer
  * as a response to a client loan request.
  */
-public class LoanReply {
+public class LoanReply implements Correlatable {
 
     private double interest; // the interest that the bank offers
     private String bankID; // the unique quote identification
@@ -34,10 +36,12 @@ public class LoanReply {
         this.bankID = quoteID;
     }
 
+    @Override
     public String getCorrelationId() {
         return correlationId;
     }
 
+    @Override
     public void setCorrelationId(String correlationId) {
         this.correlationId = correlationId;
     }
