@@ -1,4 +1,4 @@
-package services;
+package message_gateways;
 
 import util.ConnectionFactoryProvider;
 import com.rabbitmq.client.Channel;

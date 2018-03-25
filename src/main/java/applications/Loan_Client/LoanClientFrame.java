@@ -6,7 +6,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.util.UUID;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -18,8 +17,8 @@ import com.rabbitmq.client.Envelope;
 import correlation.CorrelationManager;
 import models.messaging.RequestReply;
 import models.loan.*;
-import services.GenericConsumer;
-import services.GenericProducer;
+import message_gateways.GenericConsumer;
+import message_gateways.GenericProducer;
 
 public class LoanClientFrame extends JFrame {
 

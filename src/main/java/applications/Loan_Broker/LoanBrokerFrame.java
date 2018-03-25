@@ -17,8 +17,8 @@ import correlation.CorrelationManager;
 import models.bank.*;
 import models.loan.LoanReply;
 import models.loan.LoanRequest;
-import services.GenericConsumer;
-import services.GenericProducer;
+import message_gateways.GenericConsumer;
+import message_gateways.GenericProducer;
 
 public class LoanBrokerFrame extends JFrame {
 

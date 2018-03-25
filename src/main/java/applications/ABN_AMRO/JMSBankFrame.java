@@ -17,8 +17,8 @@ import com.rabbitmq.client.Envelope;
 import correlation.CorrelationManager;
 import models.bank.*;
 import models.messaging.RequestReply;
-import services.GenericConsumer;
-import services.GenericProducer;
+import message_gateways.GenericConsumer;
+import message_gateways.GenericProducer;
 
 public class JMSBankFrame extends JFrame {
 
