@@ -1,30 +1,29 @@
 package app_gateways;
 
+import listeners.BankReplyListener;
 import message_gateways.MessageReceiverGateway;
 import message_gateways.MessageSenderGateway;
 import models.bank.BankInterestReply;
 import models.bank.BankInterestRequest;
 import serializers.BankSerializer;
-import serializers.LoanSerializer;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class BankAppGateway {
+public class BankAppGateway {
 
     private MessageSenderGateway sender;
     private MessageReceiverGateway receiver;
     private BankSerializer serializer;
 
-    private BankAppGateway() {
+    public BankAppGateway() {
         try {
-            this.sender = new MessageSenderGateway("bankRequest");
-            this.receiver = new MessageReceiverGateway("bankReply");
+            this.sender = new MessageSenderGateway("bankRequest", "bankRequest");
+            this.receiver = new MessageReceiverGateway("bankReply", "bankReply");
             this.serializer = new BankSerializer();
-
-            this.setListener();
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }
@@ -33,19 +32,20 @@ public abstract class BankAppGateway {
     public void sendBankRequest(BankInterestRequest request) {
         try {
             String json = this.serializer.requestToString(request);
-            Message message = this.sender.createTextMessge(json);
+            Message message = this.sender.createTextMessage(json);
+            message.setJMSReplyTo(receiver.getDestination());
+            message.setJMSMessageID(UUID.randomUUID().toString());
+
             this.sender.send(message);
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }
     }
 
-    public abstract void onBankReplyArrived(BankInterestRequest request, BankInterestReply reply);
-
-    private void setListener() {
+    public void setBankReplyListener(BankReplyListener listener) {
         try {
             this.receiver.setListener(message ->
-                    onBankReplyArrived(null, serializer.replyFromString(message.toString())));
+                    listener.onBankReplyArrived(null, serializer.replyFromString(message.toString())));
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }

@@ -40,6 +40,20 @@ public class LoanBrokerFrame extends JFrame {
 	 * Create the frame.
 	 */
 	private LoanBrokerFrame() {
+		this.loanClientApp = new LoanClientAppGateway() {
+			@Override
+			public void onLoanRequestArrived(LoanRequest request) {
+				add(request);
+				bankApp.sendBankRequest(new BankInterestRequest(request.getAmount(), request.getTime()));
+			}
+		};
+		this.bankApp = new BankAppGateway() {
+			@Override
+			public void onBankReplyArrived(BankInterestRequest request, BankInterestReply reply) {
+				// todo
+			}
+		};
+
 		setTitle("Loan Broker");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -112,7 +126,7 @@ public class LoanBrokerFrame extends JFrame {
 	}
 
 //	private void initConsumers() {
-//		GenericConsumer genericConsumer = GenericConsumer.getInstance();
+//		GenericConsumer genericConsumer = GenericConsumer.getJMSConnectionFactory();
 //		genericConsumer.consume("loanRequest", new DefaultConsumer(genericConsumer.getChannel()) {
 //			@Override
 //			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
@@ -131,7 +145,7 @@ public class LoanBrokerFrame extends JFrame {
 //				add(loanRequest, bankInterestRequest);
 //
 //				// Start producing
-//				GenericProducer.getInstance().produce(bankInterestRequest, "interestRequest");
+//				GenericProducer.getJMSConnectionFactory().produce(bankInterestRequest, "interestRequest");
 //			}
 //		});
 //		genericConsumer.consume("interestReply", new DefaultConsumer(genericConsumer.getChannel()) {
@@ -150,7 +164,7 @@ public class LoanBrokerFrame extends JFrame {
 //				CorrelationManager.correlate(bankReply, loanReply);
 //
 //				// Start producing
-//				GenericProducer.getInstance().produce(loanReply, String.valueOf(loanRequest.getSsn()));
+//				GenericProducer.getJMSConnectionFactory().produce(loanReply, String.valueOf(loanRequest.getSsn()));
 //			}
 //		});
 //	}

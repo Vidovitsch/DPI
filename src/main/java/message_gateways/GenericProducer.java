@@ -19,7 +19,7 @@ public class GenericProducer {
 
     public void produce(Object dto, String queueName) {
 //        try {
-//            ConnectionFactory connectionFactory = ConnectionFactoryProvider.getInstance();
+//            ConnectionFactory connectionFactory = ConnectionFactoryProvider.getJMSConnectionFactory();
 //            Connection connection = connectionFactory.newConnection();
 //            Channel channel = connection.createChannel();
 //            channel.queueDeclare(queueName, false, false, false, null);

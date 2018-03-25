@@ -11,6 +11,8 @@ import javax.swing.border.EmptyBorder;
 
 import app_gateways.LoanBrokerAppGateway;
 import models.bank.*;
+import models.loan.LoanReply;
+import models.loan.LoanRequest;
 import models.messaging.RequestReply;
 
 public class JMSBankFrame extends JFrame {
@@ -19,7 +21,7 @@ public class JMSBankFrame extends JFrame {
 	private JTextField tfReply;
 	private DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<>();
 
-	private LoanBrokerAppGateway loanBrokerApp;
+	private LoanBrokerAppGateway loanBrokerApp = new LoanBrokerAppGateway();
 	
 	/**
 	 * Launch the application.
@@ -39,6 +41,7 @@ public class JMSBankFrame extends JFrame {
 	 * Create the frame.
 	 */
 	private JMSBankFrame() {
+
 		setTitle("ABN AMRO");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -95,7 +98,7 @@ public class JMSBankFrame extends JFrame {
 //				CorrelationManager.correlate(rr.getRequest(), reply);
 //
 //				// Start producing
-//				GenericProducer.getInstance().produce(reply, "interestReply");
+//				GenericProducer.getJMSConnectionFactory().produce(reply, "interestReply");
 //			}
 		});
 		GridBagConstraints gbc_btnSendReply = new GridBagConstraints();
@@ -113,7 +116,7 @@ public class JMSBankFrame extends JFrame {
 	}
 
 //	private void initConsumers() {
-//		GenericConsumer genericConsumer = GenericConsumer.getInstance();
+//		GenericConsumer genericConsumer = GenericConsumer.getJMSConnectionFactory();
 //		genericConsumer.consume("interestRequest", new DefaultConsumer(genericConsumer.getChannel()) {
 //			@Override
 //			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {

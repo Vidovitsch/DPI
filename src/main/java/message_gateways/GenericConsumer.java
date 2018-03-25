@@ -11,7 +11,7 @@ public class GenericConsumer {
 
     private GenericConsumer() {
 //        try {
-//            ConnectionFactory connectionFactory = ConnectionFactoryProvider.getInstance();
+//            ConnectionFactory connectionFactory = ConnectionFactoryProvider.getJMSConnectionFactory();
 //            Connection connection = connectionFactory.newConnection();
 //            this.channel = connection.createChannel();
 //        } catch (IOException e) {

@@ -41,25 +41,19 @@ public class LoanClientFrame extends JFrame {
 				e.printStackTrace();
 			}
 		});
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-//                try {
-//                    if (ssn != null) {
-//                        GenericConsumer.getInstance().getChannel().queueDelete(ssn);
-//                    }
-//                } catch (IOException e) {
-//                    System.out.println(e.getMessage());
-//                }
-            }
-        });
 	}
 
 	/**
 	 * Create the frame.
 	 */
 	private LoanClientFrame() {
+		this.loanBrokerAppGateway = new LoanBrokerAppGateway() {
+			@Override
+			public void onLoanReplyArrived(LoanRequest request, LoanReply reply) {
+				add(request, reply);
+			}
+		};
+
 		setTitle("Loan Client");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 684, 619);
@@ -133,7 +127,7 @@ public class LoanClientFrame extends JFrame {
 //			try {
 //                initConsumers(String.valueOf(ssn));
 //                if (LoanClientFrame.ssn != null && !LoanClientFrame.ssn.equals(String.valueOf(ssn))) {
-//                    GenericConsumer.getInstance().getChannel().queueDelete(LoanClientFrame.ssn);
+//                    GenericConsumer.getJMSConnectionFactory().getChannel().queueDelete(LoanClientFrame.ssn);
 //                }
 //                LoanClientFrame.ssn = String.valueOf(ssn);
 //            } catch (IOException e) {
@@ -143,12 +137,12 @@ public class LoanClientFrame extends JFrame {
 			LoanRequest request = new LoanRequest(ssn, amount, time);
 
 			// Pass correlation id
-			CorrelationManager.setUUID(request);
+			//CorrelationManager.setUUID(request);
 
 			listModel.addElement( new RequestReply<>(request, null));
 
 			// Start producing
-			GenericProducer.getInstance().produce(request, "loanRequest");
+			this.loanBrokerAppGateway.applyForLoan(request);
 		});
 
 		GridBagConstraints gbc_btnQueue = new GridBagConstraints();
@@ -198,21 +192,10 @@ public class LoanClientFrame extends JFrame {
 			requestReply.setReply(loanReply);
 			requestReplyList.repaint();
 		}
-
-		try {
-			loanBrokerAppGateway = new LoanBrokerAppGateway() {
-				@Override
-				public void onLoanReplyArrived(LoanRequest request, LoanReply reply) {
-
-				}
-			};
-		} catch (Exception e) {
-
-		}
 	}
 
 //	private void initConsumers(String ssn) {
-//		GenericConsumer genericConsumer = GenericConsumer.getInstance();
+//		GenericConsumer genericConsumer = GenericConsumer.getJMSConnectionFactory();
 //		genericConsumer.consume(ssn, new DefaultConsumer(genericConsumer.getChannel()) {
 //			@Override
 //			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {

@@ -10,7 +10,7 @@ import correlation.Correlatable;
 public class BankInterestReply implements Correlatable {
 
     private double interest; // the loan interest
-    private String bankId; // the nunique quote Id
+    private String bankId; // the unique quote Id
 
     private String correlationId;
 
