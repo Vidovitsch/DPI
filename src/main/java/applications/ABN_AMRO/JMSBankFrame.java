@@ -5,19 +5,12 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import com.google.gson.Gson;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
-import correlation.CorrelationManager;
 import models.bank.*;
 import models.messaging.RequestReply;
-import message_gateways.GenericConsumer;
 import message_gateways.GenericProducer;
 
 public class JMSBankFrame extends JFrame {
@@ -92,16 +85,16 @@ public class JMSBankFrame extends JFrame {
 			RequestReply<BankInterestRequest, BankInterestReply> rr = list.getSelectedValue();
 			double interest = Double.parseDouble((tfReply.getText()));
 			BankInterestReply reply = new BankInterestReply(interest,"ABN AMRO");
-			if (rr!= null) {
-				rr.setReply(reply);
-				list.repaint();
-
-				// Pass correlation id
-				CorrelationManager.correlate(rr.getRequest(), reply);
-
-				// Start producing
-				GenericProducer.getInstance().produce(reply, "interestReply");
-			}
+//			if (rr!= null) {
+//				rr.setReply(reply);
+//				list.repaint();
+//
+//				// Pass correlation id
+//				CorrelationManager.correlate(rr.getRequest(), reply);
+//
+//				// Start producing
+//				GenericProducer.getInstance().produce(reply, "interestReply");
+//			}
 		});
 		GridBagConstraints gbc_btnSendReply = new GridBagConstraints();
 		gbc_btnSendReply.anchor = GridBagConstraints.NORTHWEST;
@@ -110,25 +103,25 @@ public class JMSBankFrame extends JFrame {
 		contentPane.add(btnSendReply, gbc_btnSendReply);
 
 		// Start consuming
-		initConsumers();
+		//initConsumers();
 	}
 
 	private void add(BankInterestRequest loanRequest){
 		listModel.addElement(new RequestReply<>(loanRequest, null));
 	}
 
-	private void initConsumers() {
-		GenericConsumer genericConsumer = GenericConsumer.getInstance();
-		genericConsumer.consume("interestRequest", new DefaultConsumer(genericConsumer.getChannel()) {
-			@Override
-			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-				String message = new String(body, "UTF-8");
-
-				Gson gson = new Gson();
-				BankInterestRequest bankInterestRequest = gson.fromJson(message, BankInterestRequest.class);
-
-				add(bankInterestRequest);
-			}
-		});
-	}
+//	private void initConsumers() {
+//		GenericConsumer genericConsumer = GenericConsumer.getInstance();
+//		genericConsumer.consume("interestRequest", new DefaultConsumer(genericConsumer.getChannel()) {
+//			@Override
+//			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+//				String message = new String(body, "UTF-8");
+//
+//				Gson gson = new Gson();
+//				BankInterestRequest bankInterestRequest = gson.fromJson(message, BankInterestRequest.class);
+//
+//				add(bankInterestRequest);
+//			}
+//		});
+//	}
 }

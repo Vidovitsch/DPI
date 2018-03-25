@@ -5,19 +5,13 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import com.google.gson.Gson;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
 import correlation.CorrelationManager;
 import models.messaging.RequestReply;
 import models.loan.*;
-import message_gateways.GenericConsumer;
 import message_gateways.GenericProducer;
 
 public class LoanClientFrame extends JFrame {
@@ -47,13 +41,13 @@ public class LoanClientFrame extends JFrame {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                try {
-                    if (ssn != null) {
-                        GenericConsumer.getInstance().getChannel().queueDelete(ssn);
-                    }
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
+//                try {
+//                    if (ssn != null) {
+//                        GenericConsumer.getInstance().getChannel().queueDelete(ssn);
+//                    }
+//                } catch (IOException e) {
+//                    System.out.println(e.getMessage());
+//                }
             }
         });
 	}
@@ -132,15 +126,15 @@ public class LoanClientFrame extends JFrame {
 			int amount = Integer.parseInt(tfAmount.getText());
 			int time = Integer.parseInt(tfTime.getText());
 
-			try {
-                initConsumers(String.valueOf(ssn));
-                if (LoanClientFrame.ssn != null && !LoanClientFrame.ssn.equals(String.valueOf(ssn))) {
-                    GenericConsumer.getInstance().getChannel().queueDelete(LoanClientFrame.ssn);
-                }
-                LoanClientFrame.ssn = String.valueOf(ssn);
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-            }
+//			try {
+//                initConsumers(String.valueOf(ssn));
+//                if (LoanClientFrame.ssn != null && !LoanClientFrame.ssn.equals(String.valueOf(ssn))) {
+//                    GenericConsumer.getInstance().getChannel().queueDelete(LoanClientFrame.ssn);
+//                }
+//                LoanClientFrame.ssn = String.valueOf(ssn);
+//            } catch (IOException e) {
+//                System.out.println(e.getMessage());
+//            }
 
 			LoanRequest request = new LoanRequest(ssn, amount, time);
 
@@ -202,18 +196,18 @@ public class LoanClientFrame extends JFrame {
 		}
 	}
 
-	private void initConsumers(String ssn) {
-		GenericConsumer genericConsumer = GenericConsumer.getInstance();
-		genericConsumer.consume(ssn, new DefaultConsumer(genericConsumer.getChannel()) {
-			@Override
-			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-				String message = new String(body, "UTF-8");
-
-				Gson gson = new Gson();
-				LoanReply loanReply = gson.fromJson(message, LoanReply.class);
-				LoanRequest loanRequest = findCorrelatedRequest(loanReply.getCorrelationId());
-				add(loanRequest, loanReply);
-			}
-		});
-	}
+//	private void initConsumers(String ssn) {
+//		GenericConsumer genericConsumer = GenericConsumer.getInstance();
+//		genericConsumer.consume(ssn, new DefaultConsumer(genericConsumer.getChannel()) {
+//			@Override
+//			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+//				String message = new String(body, "UTF-8");
+//
+//				Gson gson = new Gson();
+//				LoanReply loanReply = gson.fromJson(message, LoanReply.class);
+//				LoanRequest loanRequest = findCorrelatedRequest(loanReply.getCorrelationId());
+//				add(loanRequest, loanReply);
+//			}
+//		});
+//	}
 }

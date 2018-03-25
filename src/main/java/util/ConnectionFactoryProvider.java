@@ -1,6 +1,8 @@
 package util;
 
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.jms.admin.RMQConnectionFactory;
+
+import javax.jms.ConnectionFactory;
 
 public class ConnectionFactoryProvider {
 
@@ -14,12 +16,12 @@ public class ConnectionFactoryProvider {
     }
 
     private static ConnectionFactory createConnectionFactory() {
-        ConnectionFactory connectionFactory = new ConnectionFactory();
+        RMQConnectionFactory connectionFactory = new RMQConnectionFactory();
         connectionFactory.setHost("192.168.24.77");
-        connectionFactory.setUsername("guest");
-        connectionFactory.setPassword("guest");
         connectionFactory.setPort(5672);
         connectionFactory.setVirtualHost("/");
+        connectionFactory.setUsername("guest");
+        connectionFactory.setPassword("guest");
 
         return connectionFactory;
     }

@@ -2,11 +2,8 @@ package message_gateways;
 
 import util.ConnectionFactoryProvider;
 import com.google.gson.Gson;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 
+import javax.jms.ConnectionFactory;
 import java.io.IOException;
 
 public class GenericProducer {
@@ -21,19 +18,19 @@ public class GenericProducer {
     }
 
     public void produce(Object dto, String queueName) {
-        try {
-            ConnectionFactory connectionFactory = ConnectionFactoryProvider.getInstance();
-            Connection connection = connectionFactory.newConnection();
-            Channel channel = connection.createChannel();
-            channel.queueDeclare(queueName, false, false, false, null);
-
-            String json =  new Gson().toJson(dto);
-            channel.basicPublish("", queueName, new AMQP.BasicProperties(), json.getBytes());
-
-            channel.close();
-            connection.close();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+//        try {
+//            ConnectionFactory connectionFactory = ConnectionFactoryProvider.getInstance();
+//            Connection connection = connectionFactory.newConnection();
+//            Channel channel = connection.createChannel();
+//            channel.queueDeclare(queueName, false, false, false, null);
+//
+//            String json =  new Gson().toJson(dto);
+//            channel.basicPublish("", queueName, new AMQP.BasicProperties(), json.getBytes());
+//
+//            channel.close();
+//            connection.close();
+//        } catch (IOException e) {
+//            System.out.println(e.getMessage());
+//        }
     }
 }
