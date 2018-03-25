@@ -37,4 +37,8 @@ public class MessageSenderGateway {
     public void send(Message message) throws JMSException {
         this.producer.send(message);
     }
+
+    public void send(Message message, Destination destination) throws JMSException {
+        this.producer.send(message);
+    }
 }
