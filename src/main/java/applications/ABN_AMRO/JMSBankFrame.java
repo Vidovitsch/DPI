@@ -9,15 +9,17 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import app_gateways.LoanBrokerAppGateway;
 import models.bank.*;
 import models.messaging.RequestReply;
-import message_gateways.GenericProducer;
 
 public class JMSBankFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField tfReply;
 	private DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<>();
+
+	private LoanBrokerAppGateway loanBrokerApp;
 	
 	/**
 	 * Launch the application.

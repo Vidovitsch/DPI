@@ -6,21 +6,21 @@ import models.loan.LoanRequest;
 
 public class LoanSerializer {
 
-    private Gson gson;
+    private Gson gson = new Gson();
 
     public String requestToString(LoanRequest request) {
-        return null;
+        return gson.toJson(request);
     }
 
     public LoanRequest requestFromString(String string) {
-        return null;
+        return gson.fromJson(string, LoanRequest.class);
     }
 
     public String replyToString(LoanReply reply) {
-        return null;
+        return gson.toJson(reply);
     }
 
     public LoanReply replyFromString(String string) {
-        return null;
+        return gson.fromJson(string, LoanReply.class);
     }
 }

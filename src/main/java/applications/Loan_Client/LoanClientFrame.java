@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import app_gateways.LoanBrokerAppGateway;
 import correlation.CorrelationManager;
 import models.messaging.RequestReply;
 import models.loan.*;
@@ -24,6 +25,8 @@ public class LoanClientFrame extends JFrame {
 	private JTextField tfTime;
 
 	private static String ssn;
+	private LoanBrokerAppGateway loanBrokerAppGateway;
+
 
 	/**
 	 * Launch the application.

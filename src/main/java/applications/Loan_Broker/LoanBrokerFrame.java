@@ -8,6 +8,8 @@ import java.awt.Insets;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import app_gateways.BankAppGateway;
+import app_gateways.LoanClientAppGateway;
 import models.bank.*;
 import models.loan.LoanRequest;
 
@@ -16,6 +18,9 @@ public class LoanBrokerFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private DefaultListModel<JListLine> listModel = new DefaultListModel<>();
 	private JList<JListLine> list;
+
+	private LoanClientAppGateway loanClientApp;
+	private BankAppGateway bankApp;
 
 	/**
 	 * Launch the application.

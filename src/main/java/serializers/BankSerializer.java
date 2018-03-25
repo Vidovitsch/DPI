@@ -6,21 +6,21 @@ import models.bank.BankInterestRequest;
 
 public class BankSerializer {
 
-    private Gson gson;
+    private Gson gson = new Gson();
 
     public String requestToString(BankInterestRequest request) {
-        return null;
+        return gson.toJson(request);
     }
 
     public BankInterestRequest requestFromString(String string) {
-        return null;
+        return gson.fromJson(string, BankInterestRequest.class);
     }
 
     public String replyToString(BankInterestReply reply) {
-        return null;
+        return gson.toJson(reply);
     }
 
     public BankInterestReply replyFromString(String string) {
-        return null;
+        return gson.fromJson(string, BankInterestReply.class);
     }
 }
