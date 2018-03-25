@@ -1,5 +1,7 @@
 package message_gateways;
 
+import com.rabbitmq.jms.client.message.RMQBytesMessage;
+import com.rabbitmq.jms.client.message.RMQTextMessage;
 import util.ConnectionFactoryProvider;
 import util.DestinationProvider;
 
@@ -39,6 +41,6 @@ public class MessageSenderGateway {
     }
 
     public void send(Message message, Destination destination) throws JMSException {
-        this.producer.send(message);
+        this.producer.send(destination, message);
     }
 }

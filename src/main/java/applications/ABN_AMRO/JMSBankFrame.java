@@ -96,6 +96,8 @@ public class JMSBankFrame extends JFrame {
 			BankInterestReply reply = new BankInterestReply(interest,"ABN AMRO");
 
 			this.loanBrokerApp.sendBankReply(rr.getRequest(), reply);
+			rr.setReply(reply);
+			list.repaint();
 
 //			if (rr!= null) {
 //				rr.setReply(reply);

@@ -15,6 +15,7 @@ import app_gateways.LoanClientAppGateway;
 import listeners.BankReplyListener;
 import listeners.LoanRequestListener;
 import models.bank.*;
+import models.loan.LoanReply;
 import models.loan.LoanRequest;
 
 public class LoanBrokerFrame extends JFrame {
@@ -51,7 +52,10 @@ public class LoanBrokerFrame extends JFrame {
 			add(request, interestRequest);
 		});
 		this.bankApp.setBankReplyListener((request, reply) -> {
-			Logger.getAnonymousLogger().log(Level.SEVERE, reply.getBankId());
+			LoanRequest loanRequest = getRequestReply(request).getLoanRequest();
+			add(loanRequest, reply);
+			LoanReply loanReply = new LoanReply(reply.getInterest(), reply.getBankId());
+			loanClientApp.sendLoanReply(loanRequest, loanReply);
 		});
 
 		setTitle("Loan Broker");
@@ -90,9 +94,18 @@ public class LoanBrokerFrame extends JFrame {
 	    		 return listLine;
 	    	 }
 	     }
-	     
 	     return null;
-	   }
+	 }
+
+	 private JListLine getRequestReply(BankInterestRequest request) {
+		 for (int i = 0; i < listModel.getSize(); i++) {
+			 JListLine listLine =listModel.get(i);
+			 if (listLine.getBankRequest() == request) {
+				 return listLine;
+			 }
+		 }
+		 return null;
+	 }
 
 	private void add(LoanRequest loanRequest){
 		listModel.addElement(new JListLine(loanRequest));		

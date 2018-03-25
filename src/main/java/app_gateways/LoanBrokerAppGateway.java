@@ -12,9 +12,10 @@ import models.loan.LoanRequest;
 import serializers.BankSerializer;
 import serializers.LoanSerializer;
 
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,6 +29,9 @@ public class LoanBrokerAppGateway {
     private MessageSenderGateway bankSender;
     private MessageReceiverGateway bankReceiver;
     private BankSerializer bankSerializer;
+
+    private Map<BankInterestRequest, Message> bankRequests = new HashMap<>();
+    private Map<String, LoanRequest> loanRequests = new HashMap<>();
 
     public LoanBrokerAppGateway() {
         try {
@@ -48,10 +52,10 @@ public class LoanBrokerAppGateway {
         try {
             String json = this.loanSerializer.requestToString(request);
             Message message = this.loanSender.createTextMessage(json);
-            message.setJMSReplyTo(loanReceiver.getDestination());
-            message.setJMSMessageID(UUID.randomUUID().toString());
 
             this.loanSender.send(message);
+
+            loanRequests.put(message.getJMSMessageID(), request);
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }
@@ -59,14 +63,12 @@ public class LoanBrokerAppGateway {
 
     public void sendBankReply(BankInterestRequest request, BankInterestReply reply) {
         try {
-            String requestJson = this.bankSerializer.requestToString(request);
-            Message requestMessage = this.bankSender.createTextMessage(requestJson);
-
-            String replyJson = this.bankSerializer.requestToString(request);
+            Message requestMessage = bankRequests.get(request);
+            String replyJson = this.bankSerializer.replyToString(reply);
             Message replyMessage = this.bankSender.createTextMessage(replyJson);
+            replyMessage.setJMSCorrelationID(requestMessage.getJMSMessageID());
 
-            Destination returnAddress = requestMessage.getJMSReplyTo();
-            bankSender.send(replyMessage, returnAddress);
+            bankSender.send(replyMessage);
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }
@@ -81,7 +83,8 @@ public class LoanBrokerAppGateway {
                     bytesMessage.readBytes(buffer);
 
                     LoanReply loanReply = loanSerializer.replyFromString(new String(buffer));
-                    listener.onLoanReplyArrived(null, loanReply);
+
+                    listener.onLoanReplyArrived(loanRequests.get(message.getJMSCorrelationID()), loanReply);
                 } catch (JMSException ex) {
                     Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
                 }
@@ -100,6 +103,10 @@ public class LoanBrokerAppGateway {
                     bytesMessage.readBytes(buffer);
 
                     BankInterestRequest bankRequest = bankSerializer.requestFromString(new String(buffer));
+                    bankRequests.put(bankRequest, message);
+
+                    Logger.getAnonymousLogger().log(Level.SEVERE, "Retrieve request " + message.getJMSMessageID());
+
                     listener.onBankRequestArrived(bankRequest);
                 } catch (JMSException ex) {
                     Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
