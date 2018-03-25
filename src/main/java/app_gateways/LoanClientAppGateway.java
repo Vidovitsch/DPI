@@ -6,7 +6,7 @@ import models.loan.LoanReply;
 import models.loan.LoanRequest;
 import serializers.LoanSerializer;
 
-public class LoanClientAppGateway {
+public abstract class LoanClientAppGateway {
 
     private MessageSenderGateway sender;
     private MessageReceiverGateway receiver;

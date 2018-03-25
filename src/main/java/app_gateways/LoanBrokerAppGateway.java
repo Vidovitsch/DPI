@@ -12,17 +12,19 @@ import javax.jms.MessageListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class LoanBrokerAppGateway {
+public abstract class LoanBrokerAppGateway {
 
     private MessageSenderGateway sender;
     private MessageReceiverGateway receiver;
     private LoanSerializer serializer;
 
-    public LoanBrokerAppGateway() {
+    private LoanBrokerAppGateway() {
         try {
             this.sender = new MessageSenderGateway("loanRequest");
             this.receiver = new MessageReceiverGateway("loanReply");
             this.serializer = new LoanSerializer();
+
+            this.setListener();
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }
@@ -38,14 +40,12 @@ public class LoanBrokerAppGateway {
         }
     }
 
-    public void onLoanReplyArrived(LoanRequest request, LoanReply reply) {
+    public abstract void onLoanReplyArrived(LoanRequest request, LoanReply reply);
+
+    private void setListener() {
         try {
-            this.receiver.setListener(new MessageListener() {
-                @Override
-                public void onMessage(Message message) {
-                    onLoanReplyArrived(null, serializer.replyFromString(message.toString()));
-                }
-            });
+            this.receiver.setListener(message ->
+                    onLoanReplyArrived(null, serializer.replyFromString(message.toString())));
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }
