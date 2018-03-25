@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
+import javax.jms.JMSException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -196,6 +197,17 @@ public class LoanClientFrame extends JFrame {
 		if (requestReply != null && loanReply != null) {
 			requestReply.setReply(loanReply);
 			requestReplyList.repaint();
+		}
+
+		try {
+			loanBrokerAppGateway = new LoanBrokerAppGateway() {
+				@Override
+				public void onLoanReplyArrived(LoanRequest request, LoanReply reply) {
+
+				}
+			};
+		} catch (Exception e) {
+
 		}
 	}
 
