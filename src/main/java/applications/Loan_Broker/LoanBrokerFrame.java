@@ -4,6 +4,8 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -49,7 +51,7 @@ public class LoanBrokerFrame extends JFrame {
 			add(request, interestRequest);
 		});
 		this.bankApp.setBankReplyListener((request, reply) -> {
-			// todo
+			Logger.getAnonymousLogger().log(Level.SEVERE, reply.getBankId());
 		});
 
 		setTitle("Loan Broker");

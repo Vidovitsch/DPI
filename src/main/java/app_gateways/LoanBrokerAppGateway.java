@@ -7,6 +7,7 @@ import message_gateways.MessageReceiverGateway;
 import message_gateways.MessageSenderGateway;
 import models.bank.BankInterestReply;
 import models.bank.BankInterestRequest;
+import models.loan.LoanReply;
 import models.loan.LoanRequest;
 import serializers.BankSerializer;
 import serializers.LoanSerializer;
@@ -73,8 +74,18 @@ public class LoanBrokerAppGateway {
 
     public void setLoanReplyListener(LoanReplyListener listener) {
         try {
-            this.loanReceiver.setListener(message ->
-                    listener.onLoanReplyArrived(null, loanSerializer.replyFromString(message.toString())));
+            this.loanReceiver.setListener(message -> {
+                try {
+                    RMQBytesMessage bytesMessage = (RMQBytesMessage) message;
+                    byte[] buffer = new byte[(int) bytesMessage.getBodyLength()];
+                    bytesMessage.readBytes(buffer);
+
+                    LoanReply loanReply = loanSerializer.replyFromString(new String(buffer));
+                    listener.onLoanReplyArrived(null, loanReply);
+                } catch (JMSException ex) {
+                    Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
+                }
+            });
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }
