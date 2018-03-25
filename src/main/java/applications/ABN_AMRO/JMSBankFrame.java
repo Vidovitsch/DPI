@@ -10,7 +10,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import app_gateways.LoanBrokerAppGateway;
-import listeners.BankRequestListener;
 import models.bank.*;
 import models.loan.LoanReply;
 import models.loan.LoanRequest;
@@ -42,9 +41,6 @@ public class JMSBankFrame extends JFrame {
 	 * Create the frame.
 	 */
 	private JMSBankFrame() {
-		this.loanBrokerApp.setBankRequestListener(request -> {
-			add(request);
-		});
 
 		setTitle("ABN AMRO");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -94,9 +90,6 @@ public class JMSBankFrame extends JFrame {
 			RequestReply<BankInterestRequest, BankInterestReply> rr = list.getSelectedValue();
 			double interest = Double.parseDouble((tfReply.getText()));
 			BankInterestReply reply = new BankInterestReply(interest,"ABN AMRO");
-
-			this.loanBrokerApp.sendBankReply(rr.getRequest(), reply);
-
 //			if (rr!= null) {
 //				rr.setReply(reply);
 //				list.repaint();

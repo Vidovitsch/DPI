@@ -5,5 +5,5 @@ import models.loan.LoanRequest;
 
 public interface LoanReplyListener {
 
-    void onLoanReplyArrived(LoanRequest request, LoanReply reply);
+    void onLoanReplyArrived(LoanRequest loanRequest, LoanReply reply);
 }

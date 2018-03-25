@@ -12,7 +12,6 @@ import javax.swing.border.EmptyBorder;
 
 import app_gateways.LoanBrokerAppGateway;
 import correlation.CorrelationManager;
-import listeners.LoanReplyListener;
 import models.messaging.RequestReply;
 import models.loan.*;
 import message_gateways.GenericProducer;
@@ -27,7 +26,7 @@ public class LoanClientFrame extends JFrame {
 	private JTextField tfTime;
 
 	private static String ssn;
-	private LoanBrokerAppGateway loanBrokerAppGateway = new LoanBrokerAppGateway();
+	private LoanBrokerAppGateway loanBrokerAppGateway;
 
 
 	/**
@@ -48,9 +47,12 @@ public class LoanClientFrame extends JFrame {
 	 * Create the frame.
 	 */
 	private LoanClientFrame() {
-		this.loanBrokerAppGateway.setLoanReplyListener((request, reply) -> {
-			add(request, reply);
-		});
+		this.loanBrokerAppGateway = new LoanBrokerAppGateway() {
+			@Override
+			public void onLoanReplyArrived(LoanRequest request, LoanReply reply) {
+				add(request, reply);
+			}
+		};
 
 		setTitle("Loan Client");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

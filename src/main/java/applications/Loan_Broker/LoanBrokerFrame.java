@@ -10,8 +10,6 @@ import javax.swing.border.EmptyBorder;
 
 import app_gateways.BankAppGateway;
 import app_gateways.LoanClientAppGateway;
-import listeners.BankReplyListener;
-import listeners.LoanRequestListener;
 import models.bank.*;
 import models.loan.LoanRequest;
 
@@ -21,8 +19,8 @@ public class LoanBrokerFrame extends JFrame {
 	private DefaultListModel<JListLine> listModel = new DefaultListModel<>();
 	private JList<JListLine> list;
 
-	private LoanClientAppGateway loanClientApp = new LoanClientAppGateway();
-	private BankAppGateway bankApp = new BankAppGateway();
+	private LoanClientAppGateway loanClientApp;
+	private BankAppGateway bankApp;
 
 	/**
 	 * Launch the application.
@@ -42,15 +40,19 @@ public class LoanBrokerFrame extends JFrame {
 	 * Create the frame.
 	 */
 	private LoanBrokerFrame() {
-		this.loanClientApp.setLoanRequestListener(request ->  {
-			add(request);
-			BankInterestRequest interestRequest = new BankInterestRequest(request.getAmount(), request.getTime());
-			bankApp.sendBankRequest(interestRequest);
-			add(request, interestRequest);
-		});
-		this.bankApp.setBankReplyListener((request, reply) -> {
-			// todo
-		});
+		this.loanClientApp = new LoanClientAppGateway() {
+			@Override
+			public void onLoanRequestArrived(LoanRequest request) {
+				add(request);
+				bankApp.sendBankRequest(new BankInterestRequest(request.getAmount(), request.getTime()));
+			}
+		};
+		this.bankApp = new BankAppGateway() {
+			@Override
+			public void onBankReplyArrived(BankInterestRequest request, BankInterestReply reply) {
+				// todo
+			}
+		};
 
 		setTitle("Loan Broker");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
