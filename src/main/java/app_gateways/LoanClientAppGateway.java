@@ -1,21 +1,17 @@
 package app_gateways;
 
 import com.rabbitmq.jms.client.message.RMQBytesMessage;
-import com.rabbitmq.jms.client.message.RMQTextMessage;
 import listeners.LoanRequestListener;
 import message_gateways.MessageReceiverGateway;
 import message_gateways.MessageSenderGateway;
-import models.bank.BankInterestRequest;
 import models.loan.LoanReply;
 import models.loan.LoanRequest;
 import serializers.LoanSerializer;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.TextMessage;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,12 +50,7 @@ public class LoanClientAppGateway {
         try {
             this.receiver.setListener(message -> {
                 try {
-                    RMQBytesMessage bytesMessage = (RMQBytesMessage) message;
-                    byte[] buffer = new byte[(int) bytesMessage.getBodyLength()];
-                    bytesMessage.readBytes(buffer);
-
-                    LoanRequest request = serializer.requestFromString(new String(buffer));
-
+                    LoanRequest request = serializer.requestFromMessage((RMQBytesMessage) message);
                     listener.onLoanRequestArrived(request);
 
                     loanRequests.put(request, message);

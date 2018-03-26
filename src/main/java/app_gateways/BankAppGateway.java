@@ -6,15 +6,12 @@ import message_gateways.MessageReceiverGateway;
 import message_gateways.MessageSenderGateway;
 import models.bank.BankInterestReply;
 import models.bank.BankInterestRequest;
-import models.loan.LoanReply;
-import models.loan.LoanRequest;
 import serializers.BankSerializer;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,11 +50,7 @@ public class BankAppGateway {
         try {
             this.receiver.setListener(message -> {
                 try {
-                    RMQBytesMessage bytesMessage = (RMQBytesMessage) message;
-                    byte[] buffer = new byte[(int) bytesMessage.getBodyLength()];
-                    bytesMessage.readBytes(buffer);
-
-                    BankInterestReply bankReply = serializer.replyFromString(new String(buffer));
+                    BankInterestReply bankReply = serializer.replyFromBytesMessage((RMQBytesMessage) message);
                     BankInterestRequest bankRequest = bankRequests.get(message.getJMSCorrelationID());
 
                     listener.onBankReplyArrived(bankRequest, bankReply);

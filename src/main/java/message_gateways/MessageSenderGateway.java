@@ -28,19 +28,11 @@ public class MessageSenderGateway {
         }
     }
 
-    public Destination getDestination() {
-        return this.sendDestination;
-    }
-
     public Message createTextMessage(String body) throws JMSException {
         return this.session.createTextMessage(body);
     }
 
     public void send(Message message) throws JMSException {
         this.producer.send(message);
-    }
-
-    public void send(Message message, Destination destination) throws JMSException {
-        this.producer.send(destination, message);
     }
 }

@@ -16,7 +16,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,12 +77,7 @@ public class LoanBrokerAppGateway {
         try {
             this.loanReceiver.setListener(message -> {
                 try {
-                    RMQBytesMessage bytesMessage = (RMQBytesMessage) message;
-                    byte[] buffer = new byte[(int) bytesMessage.getBodyLength()];
-                    bytesMessage.readBytes(buffer);
-
-                    LoanReply loanReply = loanSerializer.replyFromString(new String(buffer));
-
+                    LoanReply loanReply = loanSerializer.replyFromMessage((RMQBytesMessage) message);
                     listener.onLoanReplyArrived(loanRequests.get(message.getJMSCorrelationID()), loanReply);
                 } catch (JMSException ex) {
                     Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
@@ -98,16 +92,10 @@ public class LoanBrokerAppGateway {
         try {
             this.bankReceiver.setListener(message -> {
                 try {
-                    RMQBytesMessage bytesMessage = (RMQBytesMessage) message;
-                    byte[] buffer = new byte[(int) bytesMessage.getBodyLength()];
-                    bytesMessage.readBytes(buffer);
-
-                    BankInterestRequest bankRequest = bankSerializer.requestFromString(new String(buffer));
-                    bankRequests.put(bankRequest, message);
-
-                    Logger.getAnonymousLogger().log(Level.SEVERE, "Retrieve request " + message.getJMSMessageID());
-
+                    BankInterestRequest bankRequest = bankSerializer.requestFromBytesMessage((RMQBytesMessage) message);
                     listener.onBankRequestArrived(bankRequest);
+
+                    bankRequests.put(bankRequest, message);
                 } catch (JMSException ex) {
                     Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
                 }

@@ -27,10 +27,6 @@ public class MessageReceiverGateway {
         }
     }
 
-    public Destination getDestination() {
-        return this.receiveDestination;
-    }
-
     public void setListener(MessageListener listener) throws JMSException {
         this.consumer.setMessageListener(listener);
     }

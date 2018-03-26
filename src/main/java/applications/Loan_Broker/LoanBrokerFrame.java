@@ -52,10 +52,13 @@ public class LoanBrokerFrame extends JFrame {
 			add(request, interestRequest);
 		});
 		this.bankApp.setBankReplyListener((request, reply) -> {
-			LoanRequest loanRequest = getRequestReply(request).getLoanRequest();
-			add(loanRequest, reply);
-			LoanReply loanReply = new LoanReply(reply.getInterest(), reply.getBankId());
-			loanClientApp.sendLoanReply(loanRequest, loanReply);
+			JListLine listLine = getRequestReply(request);
+			if (listLine != null) {
+				LoanRequest loanRequest = listLine.getLoanRequest();
+				add(loanRequest, reply);
+				LoanReply loanReply = new LoanReply(reply.getInterest(), reply.getBankId());
+				loanClientApp.sendLoanReply(loanRequest, loanReply);
+			}
 		});
 
 		setTitle("Loan Broker");
@@ -82,9 +85,6 @@ public class LoanBrokerFrame extends JFrame {
 		
 		list = new JList<>(listModel);
 		scrollPane.setViewportView(list);
-
-		// Start consuming
-		//initConsumers();
 	}
 	
 	 private JListLine getRequestReply(LoanRequest request) {
@@ -99,7 +99,7 @@ public class LoanBrokerFrame extends JFrame {
 
 	 private JListLine getRequestReply(BankInterestRequest request) {
 		 for (int i = 0; i < listModel.getSize(); i++) {
-			 JListLine listLine =listModel.get(i);
+			 JListLine listLine = listModel.get(i);
 			 if (listLine.getBankRequest() == request) {
 				 return listLine;
 			 }
@@ -115,7 +115,6 @@ public class LoanBrokerFrame extends JFrame {
 		JListLine listLine = getRequestReply(loanRequest);
 		if (listLine != null && bankRequest != null) {
 			listLine.setBankRequest(bankRequest);
-            list.repaint();
 		}		
 	}
 
@@ -126,59 +125,4 @@ public class LoanBrokerFrame extends JFrame {
             list.repaint();
 		}		
 	}
-
-	private LoanRequest findCorrelatedRequest(String correlationId) {
-		for (int i = 0; i < listModel.getSize(); i++) {
-			JListLine listLine =listModel.get(i);
-			if (listLine.getLoanRequest().getCorrelationId().equals(correlationId)) {
-				return listLine.getLoanRequest();
-			}
-		}
-
-		return null;
-	}
-
-//	private void initConsumers() {
-//		GenericConsumer genericConsumer = GenericConsumer.getJMSConnectionFactory();
-//		genericConsumer.consume("loanRequest", new DefaultConsumer(genericConsumer.getChannel()) {
-//			@Override
-//			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-//				String message = new String(body, "UTF-8");
-//
-//				Gson gson = new Gson();
-//				LoanRequest loanRequest = gson.fromJson(message, LoanRequest.class);
-//
-//				add(loanRequest);
-//
-//				BankInterestRequest bankInterestRequest = new BankInterestRequest(loanRequest.getAmount(), loanRequest.getTime());
-//
-//				// Pass correlation id
-//				CorrelationManager.correlate(loanRequest, bankInterestRequest);
-//
-//				add(loanRequest, bankInterestRequest);
-//
-//				// Start producing
-//				GenericProducer.getJMSConnectionFactory().produce(bankInterestRequest, "interestRequest");
-//			}
-//		});
-//		genericConsumer.consume("interestReply", new DefaultConsumer(genericConsumer.getChannel()) {
-//			@Override
-//			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-//				String message = new String(body, "UTF-8");
-//
-//				Gson gson = new Gson();
-//				BankInterestReply bankReply = gson.fromJson(message, BankInterestReply.class);
-//				LoanRequest loanRequest = findCorrelatedRequest(bankReply.getCorrelationId());
-//				add(loanRequest, bankReply);
-//
-//				LoanReply loanReply = new LoanReply(bankReply.getInterest(), bankReply.getBankId());
-//
-//				// Pass correlation id
-//				CorrelationManager.correlate(bankReply, loanReply);
-//
-//				// Start producing
-//				GenericProducer.getJMSConnectionFactory().produce(loanReply, String.valueOf(loanRequest.getSsn()));
-//			}
-//		});
-//	}
 }
