@@ -12,6 +12,8 @@ public class LoanRequest {
     private int amount; // the amount to borrow
     private int time; // the time-span of the loan
 
+    private String sessionId;
+
     public LoanRequest(int ssn, int amount, int time) {
         super();
         this.ssn = ssn;
@@ -41,6 +43,14 @@ public class LoanRequest {
 
     public void setTime(int time) {
         this.time = time;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     @Override

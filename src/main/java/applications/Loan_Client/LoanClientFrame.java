@@ -5,6 +5,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.util.UUID;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -25,6 +26,7 @@ public class LoanClientFrame extends JFrame implements LoanReplyListener {
 
 	private LoanBrokerAppGateway loanBrokerAppGateway = new LoanBrokerAppGateway();
 
+	private static String sessionId = UUID.randomUUID().toString();
 
 	/**
 	 * Launch the application.
@@ -45,7 +47,7 @@ public class LoanClientFrame extends JFrame implements LoanReplyListener {
 	 */
 	private LoanClientFrame() {
 		// Set listener
-		this.loanBrokerAppGateway.setLoanReplyListener(this::add);
+		this.loanBrokerAppGateway.setLoanReplyListener(sessionId, this::add);
 
 		setTitle("Loan Client");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -118,6 +120,7 @@ public class LoanClientFrame extends JFrame implements LoanReplyListener {
 			int time = Integer.parseInt(tfTime.getText());
 
 			LoanRequest request = new LoanRequest(ssn, amount, time);
+			request.setSessionId(sessionId);
 			listModel.addElement( new RequestReply<>(request, null));
 
 			this.loanBrokerAppGateway.applyForLoan(request);

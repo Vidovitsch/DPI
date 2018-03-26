@@ -73,9 +73,9 @@ public class LoanBrokerAppGateway {
         }
     }
 
-    public void setLoanReplyListener(LoanReplyListener listener) {
+    public void setLoanReplyListener(String sessionId, LoanReplyListener listener) {
         try {
-            this.loanReceiver.setListener(message -> {
+            new MessageReceiverGateway(sessionId, sessionId).setListener(message -> {
                 try {
                     LoanReply loanReply = loanSerializer.replyFromMessage((RMQBytesMessage) message);
                     listener.onLoanReplyArrived(loanRequests.get(message.getJMSCorrelationID()), loanReply);
