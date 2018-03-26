@@ -5,7 +5,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,6 +18,7 @@ import app_gateways.LoanBrokerAppGateway;
 import listeners.LoanReplyListener;
 import models.messaging.RequestReply;
 import models.loan.*;
+import util.RabbitMQManager;
 
 public class LoanClientFrame extends JFrame implements LoanReplyListener {
 
@@ -25,6 +30,7 @@ public class LoanClientFrame extends JFrame implements LoanReplyListener {
 	private JTextField tfTime;
 
 	private LoanBrokerAppGateway loanBrokerAppGateway = new LoanBrokerAppGateway();
+	private static RabbitMQManager rmqManager = new RabbitMQManager();
 
 	private static String sessionId = UUID.randomUUID().toString();
 
@@ -40,6 +46,13 @@ public class LoanClientFrame extends JFrame implements LoanReplyListener {
 				e.printStackTrace();
 			}
 		});
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			try {
+				rmqManager.deleteQueue(sessionId);
+			} catch (IOException | TimeoutException ex) {
+				Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
+			}
+		}));
 	}
 
 	/**
