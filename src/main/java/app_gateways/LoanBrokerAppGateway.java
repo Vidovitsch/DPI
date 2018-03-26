@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 public class LoanBrokerAppGateway {
 
     private MessageSenderGateway loanSender;
-    private MessageReceiverGateway loanReceiver;
     private LoanSerializer loanSerializer;
 
     private MessageSenderGateway bankSender;
@@ -35,7 +34,6 @@ public class LoanBrokerAppGateway {
     public LoanBrokerAppGateway() {
         try {
             this.loanSender = new MessageSenderGateway("loanRequest", "loanRequest");
-            this.loanReceiver = new MessageReceiverGateway("loanReply","loanReply");
 
             this.bankSender = new MessageSenderGateway("bankReply", "bankReply");
             this.bankReceiver = new MessageReceiverGateway("bankRequest","bankRequest");

@@ -4,16 +4,12 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import app_gateways.BankAppGateway;
 import app_gateways.LoanClientAppGateway;
-import listeners.BankReplyListener;
-import listeners.LoanRequestListener;
 import models.bank.*;
 import models.loan.LoanReply;
 import models.loan.LoanRequest;

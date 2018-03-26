@@ -12,13 +12,12 @@ import java.util.logging.Logger;
 public class MessageReceiverGateway {
 
     private MessageConsumer consumer;
-    private Destination receiveDestination;
 
     public MessageReceiverGateway(String destinationName, String routingKey) throws JMSException {
         try {
             Connection connection = ConnectionFactoryProvider.getJMSConnectionFactory().createConnection();
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            this.receiveDestination = DestinationProvider.getInstance(destinationName, routingKey);
+            Destination receiveDestination = DestinationProvider.getInstance(destinationName, routingKey);
             this.consumer = session.createConsumer(receiveDestination);
 
             connection.start();

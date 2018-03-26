@@ -7,15 +7,11 @@ import message_gateways.MessageSenderGateway;
 import models.loan.LoanReply;
 import models.loan.LoanRequest;
 import serializers.LoanSerializer;
-import util.DestinationProvider;
 
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
