@@ -10,15 +10,14 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import app_gateways.LoanBrokerAppGateway;
-import listeners.BankRequestListener;
 import models.bank.*;
-import models.loan.LoanReply;
-import models.loan.LoanRequest;
 import models.messaging.RequestReply;
 
 public class JMSBankFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+	private static final String BANK_ID = "ABN AMRO";
+
 	private JTextField tfReply;
 	private DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<>();
 
@@ -42,11 +41,10 @@ public class JMSBankFrame extends JFrame {
 	 * Create the frame.
 	 */
 	private JMSBankFrame() {
-		this.loanBrokerApp.setBankRequestListener(request -> {
-			add(request);
-		});
+		// Set listener
+		this.loanBrokerApp.setBankRequestListener(this::add);
 
-		setTitle("ABN AMRO");
+		setTitle(BANK_ID);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		JPanel contentPane = new JPanel();
@@ -93,47 +91,20 @@ public class JMSBankFrame extends JFrame {
 		btnSendReply.addActionListener((ActionEvent e) -> {
 			RequestReply<BankInterestRequest, BankInterestReply> rr = list.getSelectedValue();
 			double interest = Double.parseDouble((tfReply.getText()));
-			BankInterestReply reply = new BankInterestReply(interest,"ABN AMRO");
+			BankInterestReply reply = new BankInterestReply(interest, BANK_ID);
 
 			this.loanBrokerApp.sendBankReply(rr.getRequest(), reply);
-
-//			if (rr!= null) {
-//				rr.setReply(reply);
-//				list.repaint();
-//
-//				// Pass correlation id
-//				CorrelationManager.correlate(rr.getRequest(), reply);
-//
-//				// Start producing
-//				GenericProducer.getJMSConnectionFactory().produce(reply, "interestReply");
-//			}
+			rr.setReply(reply);
+			list.repaint();
 		});
 		GridBagConstraints gbc_btnSendReply = new GridBagConstraints();
 		gbc_btnSendReply.anchor = GridBagConstraints.NORTHWEST;
 		gbc_btnSendReply.gridx = 4;
 		gbc_btnSendReply.gridy = 1;
 		contentPane.add(btnSendReply, gbc_btnSendReply);
-
-		// Start consuming
-		//initConsumers();
 	}
 
 	private void add(BankInterestRequest loanRequest){
 		listModel.addElement(new RequestReply<>(loanRequest, null));
 	}
-
-//	private void initConsumers() {
-//		GenericConsumer genericConsumer = GenericConsumer.getJMSConnectionFactory();
-//		genericConsumer.consume("interestRequest", new DefaultConsumer(genericConsumer.getChannel()) {
-//			@Override
-//			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-//				String message = new String(body, "UTF-8");
-//
-//				Gson gson = new Gson();
-//				BankInterestRequest bankInterestRequest = gson.fromJson(message, BankInterestRequest.class);
-//
-//				add(bankInterestRequest);
-//			}
-//		});
-//	}
 }

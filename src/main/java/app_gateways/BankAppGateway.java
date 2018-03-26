@@ -1,5 +1,6 @@
 package app_gateways;
 
+import com.rabbitmq.jms.client.message.RMQBytesMessage;
 import listeners.BankReplyListener;
 import message_gateways.MessageReceiverGateway;
 import message_gateways.MessageSenderGateway;
@@ -9,7 +10,8 @@ import serializers.BankSerializer;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +20,8 @@ public class BankAppGateway {
     private MessageSenderGateway sender;
     private MessageReceiverGateway receiver;
     private BankSerializer serializer;
+
+    private Map<String, BankInterestRequest> bankRequests = new HashMap<>();
 
     public BankAppGateway() {
         try {
@@ -33,10 +37,10 @@ public class BankAppGateway {
         try {
             String json = this.serializer.requestToString(request);
             Message message = this.sender.createTextMessage(json);
-            message.setJMSReplyTo(receiver.getDestination());
-            message.setJMSMessageID(UUID.randomUUID().toString());
 
             this.sender.send(message);
+
+            bankRequests.put(message.getJMSMessageID(), request);
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }
@@ -44,8 +48,17 @@ public class BankAppGateway {
 
     public void setBankReplyListener(BankReplyListener listener) {
         try {
-            this.receiver.setListener(message ->
-                    listener.onBankReplyArrived(null, serializer.replyFromString(message.toString())));
+            this.receiver.setListener(message -> {
+                try {
+                    BankInterestReply bankReply = serializer.replyFromBytesMessage((RMQBytesMessage) message);
+                    BankInterestRequest bankRequest = bankRequests.get(message.getJMSCorrelationID());
+
+                    listener.onBankReplyArrived(bankRequest, bankReply);
+                } catch (JMSException ex) {
+                    Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
+                }
+            });
+
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }

@@ -1,7 +1,6 @@
 package app_gateways;
 
 import com.rabbitmq.jms.client.message.RMQBytesMessage;
-import com.rabbitmq.jms.client.message.RMQTextMessage;
 import listeners.LoanRequestListener;
 import message_gateways.MessageReceiverGateway;
 import message_gateways.MessageSenderGateway;
@@ -11,7 +10,8 @@ import serializers.LoanSerializer;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.TextMessage;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +20,8 @@ public class LoanClientAppGateway {
     private MessageSenderGateway sender;
     private MessageReceiverGateway receiver;
     private LoanSerializer serializer;
+
+    private Map<LoanRequest, Message> loanRequests = new HashMap<>();
 
     public LoanClientAppGateway() {
         try {
@@ -33,9 +35,12 @@ public class LoanClientAppGateway {
 
     public void sendLoanReply(LoanRequest request, LoanReply reply) {
         try {
-            String json = this.serializer.requestToString(request);
-            Message message = this.sender.createTextMessage(json);
-            this.sender.send(message);
+            Message requestMessage = loanRequests.get(request);
+            String json = this.serializer.replyToString(reply);
+            Message replyMessage = this.sender.createTextMessage(json);
+            replyMessage.setJMSCorrelationID(requestMessage.getJMSMessageID());
+
+            new message_gateways.MessageSenderGateway(request.getSessionId(), request.getSessionId()).send(replyMessage);
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }
@@ -45,12 +50,10 @@ public class LoanClientAppGateway {
         try {
             this.receiver.setListener(message -> {
                 try {
-                    RMQBytesMessage bytesMessage = (RMQBytesMessage) message;
-                    byte[] buffer = new byte[(int) bytesMessage.getBodyLength()];
-                    bytesMessage.readBytes(buffer);
-
-                    LoanRequest request = serializer.requestFromString(new String(buffer));
+                    LoanRequest request = serializer.requestFromMessage((RMQBytesMessage) message);
                     listener.onLoanRequestArrived(request);
+
+                    loanRequests.put(request, message);
                 } catch (Exception ex) {
                     Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
                 }

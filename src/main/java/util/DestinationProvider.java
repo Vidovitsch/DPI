@@ -1,7 +1,5 @@
 package util;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 import com.rabbitmq.jms.admin.RMQDestination;
 
 import javax.jms.Destination;
@@ -10,6 +8,8 @@ import java.util.concurrent.TimeoutException;
 
 
 public class DestinationProvider {
+
+    private static RabbitMQManager rmqManager = new RabbitMQManager();
 
     public static Destination getInstance(String destinationName, String routingKey)
             throws IOException, TimeoutException {
@@ -21,22 +21,13 @@ public class DestinationProvider {
             throws IOException, TimeoutException {
 
         String exchangeName = "jms.durable.queues";
-        ensureDestinationAvailability(exchangeName, destinationName, routingKey);
+        rmqManager.createExchange(exchangeName);
+        rmqManager.createQueue(destinationName);
+        rmqManager.bindQueue(destinationName, exchangeName, destinationName);
 
         RMQDestination destination =  new RMQDestination(destinationName, exchangeName, routingKey, destinationName);
         destination.setAmqp(true);
 
         return destination;
-    }
-
-    private static void ensureDestinationAvailability(String exchangeName, String queueName, String routingKey)
-            throws IOException, TimeoutException {
-
-        Connection connection = ConnectionFactoryProvider.getRMQConnectionFactory().newConnection();
-        Channel channel = connection.createChannel();
-
-        channel.exchangeDeclare(exchangeName, "direct", true);
-        channel.queueDeclare(queueName, true, false, false, null);
-        channel.queueBind(queueName, exchangeName, routingKey);
     }
 }

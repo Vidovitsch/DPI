@@ -5,19 +5,22 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.jms.JMSException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import app_gateways.LoanBrokerAppGateway;
-import correlation.CorrelationManager;
 import listeners.LoanReplyListener;
 import models.messaging.RequestReply;
 import models.loan.*;
-import message_gateways.GenericProducer;
+import util.RabbitMQManager;
 
-public class LoanClientFrame extends JFrame {
+public class LoanClientFrame extends JFrame implements LoanReplyListener {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField tfSSN;
@@ -26,9 +29,10 @@ public class LoanClientFrame extends JFrame {
 	private JTextField tfAmount;
 	private JTextField tfTime;
 
-	private static String ssn;
 	private LoanBrokerAppGateway loanBrokerAppGateway = new LoanBrokerAppGateway();
+	private static RabbitMQManager rmqManager = new RabbitMQManager();
 
+	private static String sessionId = UUID.randomUUID().toString();
 
 	/**
 	 * Launch the application.
@@ -42,15 +46,21 @@ public class LoanClientFrame extends JFrame {
 				e.printStackTrace();
 			}
 		});
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			try {
+				rmqManager.deleteQueue(sessionId);
+			} catch (IOException | TimeoutException ex) {
+				Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
+			}
+		}));
 	}
 
 	/**
 	 * Create the frame.
 	 */
 	private LoanClientFrame() {
-		this.loanBrokerAppGateway.setLoanReplyListener((request, reply) -> {
-			add(request, reply);
-		});
+		// Set listener
+		this.loanBrokerAppGateway.setLoanReplyListener(sessionId, this::add);
 
 		setTitle("Loan Client");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -122,24 +132,10 @@ public class LoanClientFrame extends JFrame {
 			int amount = Integer.parseInt(tfAmount.getText());
 			int time = Integer.parseInt(tfTime.getText());
 
-//			try {
-//                initConsumers(String.valueOf(ssn));
-//                if (LoanClientFrame.ssn != null && !LoanClientFrame.ssn.equals(String.valueOf(ssn))) {
-//                    GenericConsumer.getJMSConnectionFactory().getChannel().queueDelete(LoanClientFrame.ssn);
-//                }
-//                LoanClientFrame.ssn = String.valueOf(ssn);
-//            } catch (IOException e) {
-//                System.out.println(e.getMessage());
-//            }
-
 			LoanRequest request = new LoanRequest(ssn, amount, time);
-
-			// Pass correlation id
-			//CorrelationManager.setUUID(request);
-
+			request.setSessionId(sessionId);
 			listModel.addElement( new RequestReply<>(request, null));
 
-			// Start producing
 			this.loanBrokerAppGateway.applyForLoan(request);
 		});
 
@@ -173,17 +169,6 @@ public class LoanClientFrame extends JFrame {
 	   return null;
    }
 
-	private LoanRequest findCorrelatedRequest(String correlationId) {
-		for (int i = 0; i < listModel.getSize(); i++) {
-			RequestReply<LoanRequest,LoanReply> requestReply =listModel.get(i);
-			if (requestReply.getRequest().getCorrelationId().equals(correlationId)) {
-				return requestReply.getRequest();
-			}
-		}
-
-		return null;
-	}
-
 	private void add(LoanRequest loanRequest, LoanReply loanReply) {
 		RequestReply<LoanRequest,LoanReply> requestReply = getRequestReply(loanRequest);
 		if (requestReply != null && loanReply != null) {
@@ -192,18 +177,8 @@ public class LoanClientFrame extends JFrame {
 		}
 	}
 
-//	private void initConsumers(String ssn) {
-//		GenericConsumer genericConsumer = GenericConsumer.getJMSConnectionFactory();
-//		genericConsumer.consume(ssn, new DefaultConsumer(genericConsumer.getChannel()) {
-//			@Override
-//			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-//				String message = new String(body, "UTF-8");
-//
-//				Gson gson = new Gson();
-//				LoanReply loanReply = gson.fromJson(message, LoanReply.class);
-//				LoanRequest loanRequest = findCorrelatedRequest(loanReply.getCorrelationId());
-//				add(loanRequest, loanReply);
-//			}
-//		});
-//	}
+	@Override
+	public void onLoanReplyArrived(LoanRequest request, LoanReply reply) {
+		add(request, reply);
+	}
 }
