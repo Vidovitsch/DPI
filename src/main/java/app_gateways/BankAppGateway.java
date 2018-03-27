@@ -1,5 +1,6 @@
 package app_gateways;
 
+import applications.Loan_Broker.Aggregator;
 import com.rabbitmq.jms.client.message.RMQBytesMessage;
 import listeners.BankReplyListener;
 import message_gateways.MessageReceiverGateway;
@@ -13,6 +14,7 @@ import javax.jms.Message;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +25,7 @@ public class BankAppGateway {
     private BankSerializer serializer;
 
     private Map<String, BankInterestRequest> bankRequests = new HashMap<>();
+    private Aggregator aggregator = new Aggregator();
 
     public BankAppGateway() {
         try {
@@ -38,6 +41,11 @@ public class BankAppGateway {
         try {
             String json = this.serializer.requestToString(request);
             Message message = this.sender.createTextMessage(json);
+            String aggregationId = UUID.randomUUID().toString();
+            message.setStringProperty("aggregationId", aggregationId);
+
+            aggregator.registerAggregations(aggregationId, recipients.size());
+
             for (String recipient : recipients) {
                 new MessageSenderGateway(recipient, recipient).send(message);
                 bankRequests.put(message.getJMSMessageID(), request);
@@ -52,9 +60,13 @@ public class BankAppGateway {
             this.receiver.setListener(message -> {
                 try {
                     BankInterestReply bankReply = serializer.replyFromBytesMessage((RMQBytesMessage) message);
-                    BankInterestRequest bankRequest = bankRequests.get(message.getJMSCorrelationID());
+                    String aggregationId = message.getStringProperty("aggregationId");
+                    aggregator.addReply(aggregationId, bankReply);
 
-                    listener.onBankReplyArrived(bankRequest, bankReply);
+                    if (aggregator.validateAggregations(aggregationId)) {
+                        BankInterestRequest bankRequest = bankRequests.get(message.getJMSCorrelationID());
+                        listener.onBankReplyArrived(bankRequest, aggregator.getBestReply(aggregationId));
+                    }
                 } catch (JMSException ex) {
                     Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
                 }
