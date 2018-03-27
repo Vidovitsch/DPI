@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,6 +14,7 @@ import app_gateways.LoanClientAppGateway;
 import models.bank.*;
 import models.loan.LoanReply;
 import models.loan.LoanRequest;
+import net.sourceforge.jeval.Evaluator;
 
 public class LoanBrokerFrame extends JFrame {
 
@@ -22,6 +24,7 @@ public class LoanBrokerFrame extends JFrame {
 
 	private LoanClientAppGateway loanClientApp = new LoanClientAppGateway();
 	private BankAppGateway bankApp = new BankAppGateway();
+	private RecipientList recipientList = new RecipientList();
 
 	/**
 	 * Launch the application.
@@ -41,9 +44,17 @@ public class LoanBrokerFrame extends JFrame {
 	 * Create the frame.
 	 */
 	private LoanBrokerFrame() {
+		// Add recipients with rules
+		recipientList.addRecipient("ING", "#{amount} <= 100000 && #{time} <= 10");
+		recipientList.addRecipient("ABN_AMRO", "#{amount} >= 200000 && #{amount} <= 300000  && #{time} <= 20");
+		recipientList.addRecipient("RaboBank", "#{amount} <= 250000 && #{time} <= 15");
+
 		this.loanClientApp.setLoanRequestListener(request ->  {
 			add(request);
 			BankInterestRequest interestRequest = new BankInterestRequest(request.getAmount(), request.getTime());
+
+			List<String> recipients = recipientList.evaluateRules(interestRequest.getAmount(), interestRequest.getTime());
+
 			bankApp.sendBankRequest(interestRequest);
 			add(request, interestRequest);
 		});
