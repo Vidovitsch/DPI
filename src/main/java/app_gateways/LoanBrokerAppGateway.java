@@ -86,9 +86,9 @@ public class LoanBrokerAppGateway {
         }
     }
 
-    public void setBankRequestListener(BankRequestListener listener) {
+    public void setBankRequestListener(String queueName, BankRequestListener listener) {
         try {
-            this.bankReceiver.setListener(message -> {
+            new MessageReceiverGateway(queueName, queueName).setListener(message -> {
                 try {
                     BankInterestRequest bankRequest = bankSerializer.requestFromBytesMessage((RMQBytesMessage) message);
                     listener.onBankRequestArrived(bankRequest);

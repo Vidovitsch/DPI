@@ -39,7 +39,7 @@ public class RaboBank extends JFrame {
 	 */
 	private RaboBank() {
 		// Set listener
-		this.loanBrokerApp.setBankRequestListener(this::add);
+		this.loanBrokerApp.setBankRequestListener(BANK_ID, this::add);
 
 		setTitle(BANK_ID);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

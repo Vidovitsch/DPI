@@ -46,7 +46,7 @@ public class LoanBrokerFrame extends JFrame {
 	private LoanBrokerFrame() {
 		// Add recipients with rules
 		recipientList.addRecipient("ING", "#{amount} <= 100000 && #{time} <= 10");
-		recipientList.addRecipient("ABN_AMRO", "#{amount} >= 200000 && #{amount} <= 300000  && #{time} <= 20");
+		recipientList.addRecipient("ABN AMRO", "#{amount} >= 200000 && #{amount} <= 300000  && #{time} <= 20");
 		recipientList.addRecipient("RaboBank", "#{amount} <= 250000 && #{time} <= 15");
 
 		this.loanClientApp.setLoanRequestListener(request ->  {
@@ -55,7 +55,7 @@ public class LoanBrokerFrame extends JFrame {
 
 			List<String> recipients = recipientList.evaluateRules(interestRequest.getAmount(), interestRequest.getTime());
 
-			bankApp.sendBankRequest(interestRequest);
+			bankApp.sendBankRequest(recipients, interestRequest);
 			add(request, interestRequest);
 		});
 		this.bankApp.setBankReplyListener((request, reply) -> {

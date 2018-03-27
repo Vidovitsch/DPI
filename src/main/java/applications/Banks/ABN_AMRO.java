@@ -42,7 +42,7 @@ public class ABN_AMRO extends JFrame {
 	 */
 	private ABN_AMRO() {
 		// Set listener
-		this.loanBrokerApp.setBankRequestListener(this::add);
+		this.loanBrokerApp.setBankRequestListener(BANK_ID, this::add);
 
 		setTitle(BANK_ID);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

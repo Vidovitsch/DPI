@@ -11,6 +11,7 @@ import serializers.BankSerializer;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,14 +34,14 @@ public class BankAppGateway {
         }
     }
 
-    public void sendBankRequest(BankInterestRequest request) {
+    public void sendBankRequest(List<String> recipients, BankInterestRequest request) {
         try {
             String json = this.serializer.requestToString(request);
             Message message = this.sender.createTextMessage(json);
-
-            this.sender.send(message);
-
-            bankRequests.put(message.getJMSMessageID(), request);
+            for (String recipient : recipients) {
+                new MessageSenderGateway(recipient, recipient).send(message);
+                bankRequests.put(message.getJMSMessageID(), request);
+            }
         } catch (JMSException ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, ex.getMessage());
         }
