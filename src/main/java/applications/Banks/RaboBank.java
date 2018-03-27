@@ -1,35 +1,32 @@
-package applications.ABN_AMRO;
+package applications.Banks;
 
-import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
+import app_gateways.LoanBrokerAppGateway;
+import models.bank.BankInterestReply;
+import models.bank.BankInterestRequest;
+import models.messaging.RequestReply;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
-import app_gateways.LoanBrokerAppGateway;
-import models.bank.*;
-import models.messaging.RequestReply;
-
-public class JMSBankFrame extends JFrame {
+public class RaboBank extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private static final String BANK_ID = "ABN AMRO";
+	private static final String BANK_ID = "RaboBank";
 
 	private JTextField tfReply;
 	private DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<>();
 
 	private LoanBrokerAppGateway loanBrokerApp = new LoanBrokerAppGateway();
-	
+
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(() -> {
 			try {
-				JMSBankFrame frame = new JMSBankFrame();
+				RaboBank frame = new RaboBank();
 				frame.setVisible(true);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -40,9 +37,9 @@ public class JMSBankFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	private JMSBankFrame() {
+	private RaboBank() {
 		// Set listener
-		this.loanBrokerApp.setBankRequestListener(this::add);
+		this.loanBrokerApp.setBankRequestListener(BANK_ID, this::add);
 
 		setTitle(BANK_ID);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

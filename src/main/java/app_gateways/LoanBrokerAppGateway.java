@@ -25,7 +25,6 @@ public class LoanBrokerAppGateway {
     private LoanSerializer loanSerializer;
 
     private MessageSenderGateway bankSender;
-    private MessageReceiverGateway bankReceiver;
     private BankSerializer bankSerializer;
 
     private Map<BankInterestRequest, Message> bankRequests = new HashMap<>();
@@ -34,9 +33,7 @@ public class LoanBrokerAppGateway {
     public LoanBrokerAppGateway() {
         try {
             this.loanSender = new MessageSenderGateway("loanRequest", "loanRequest");
-
             this.bankSender = new MessageSenderGateway("bankReply", "bankReply");
-            this.bankReceiver = new MessageReceiverGateway("bankRequest","bankRequest");
 
             this.loanSerializer = new LoanSerializer();
             this.bankSerializer = new BankSerializer();
@@ -64,6 +61,7 @@ public class LoanBrokerAppGateway {
             String replyJson = this.bankSerializer.replyToString(reply);
             Message replyMessage = this.bankSender.createTextMessage(replyJson);
             replyMessage.setJMSCorrelationID(requestMessage.getJMSMessageID());
+            replyMessage.setStringProperty("aggregationId", requestMessage.getStringProperty("aggregationId"));
 
             bankSender.send(replyMessage);
         } catch (JMSException ex) {
@@ -86,9 +84,9 @@ public class LoanBrokerAppGateway {
         }
     }
 
-    public void setBankRequestListener(BankRequestListener listener) {
+    public void setBankRequestListener(String queueName, BankRequestListener listener) {
         try {
-            this.bankReceiver.setListener(message -> {
+            new MessageReceiverGateway(queueName, queueName).setListener(message -> {
                 try {
                     BankInterestRequest bankRequest = bankSerializer.requestFromBytesMessage((RMQBytesMessage) message);
                     listener.onBankRequestArrived(bankRequest);
