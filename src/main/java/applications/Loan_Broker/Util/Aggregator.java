@@ -1,4 +1,4 @@
-package applications.Loan_Broker;
+package applications.Loan_Broker.Util;
 
 
 import models.bank.BankInterestReply;

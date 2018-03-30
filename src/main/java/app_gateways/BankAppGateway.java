@@ -1,6 +1,6 @@
 package app_gateways;
 
-import applications.Loan_Broker.Aggregator;
+import applications.Loan_Broker.Util.Aggregator;
 import com.rabbitmq.jms.client.message.RMQBytesMessage;
 import listeners.BankReplyListener;
 import message_gateways.MessageReceiverGateway;

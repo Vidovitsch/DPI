@@ -11,10 +11,10 @@ import javax.swing.border.EmptyBorder;
 
 import app_gateways.BankAppGateway;
 import app_gateways.LoanClientAppGateway;
+import applications.Loan_Broker.Util.RecipientList;
 import models.bank.*;
 import models.loan.LoanReply;
 import models.loan.LoanRequest;
-import net.sourceforge.jeval.Evaluator;
 
 public class LoanBrokerFrame extends JFrame {
 
