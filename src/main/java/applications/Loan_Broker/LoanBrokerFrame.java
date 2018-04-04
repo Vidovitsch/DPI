@@ -1,20 +1,17 @@
 package applications.Loan_Broker;
 
-import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.util.List;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
 import app_gateways.BankAppGateway;
 import app_gateways.LoanClientAppGateway;
 import applications.Loan_Broker.Util.RecipientList;
-import models.bank.*;
+import models.bank.BankInterestReply;
+import models.bank.BankInterestRequest;
 import models.loan.LoanReply;
 import models.loan.LoanRequest;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.util.List;
 
 public class LoanBrokerFrame extends JFrame {
 
@@ -115,7 +112,7 @@ public class LoanBrokerFrame extends JFrame {
 	 }
 
 	private void add(LoanRequest loanRequest){
-		listModel.addElement(new JListLine(loanRequest));		
+		listModel.addElement(new JListLine(loanRequest));
 	}
 
 	private void add(LoanRequest loanRequest, BankInterestRequest bankRequest) {

@@ -1,24 +1,21 @@
 package applications.Loan_Client;
 
-import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import app_gateways.LoanBrokerAppGateway;
+import listeners.LoanReplyListener;
+import models.loan.LoanReply;
+import models.loan.LoanRequest;
+import models.messaging.RequestReply;
+import util.RabbitMQManager;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
-import app_gateways.LoanBrokerAppGateway;
-import listeners.LoanReplyListener;
-import models.messaging.RequestReply;
-import models.loan.*;
-import util.RabbitMQManager;
 
 public class LoanClientFrame extends JFrame implements LoanReplyListener {
 

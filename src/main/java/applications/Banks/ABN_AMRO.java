@@ -1,17 +1,14 @@
 package applications.Banks;
 
-import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
+import app_gateways.LoanBrokerAppGateway;
+import models.bank.BankInterestReply;
+import models.bank.BankInterestRequest;
+import models.messaging.RequestReply;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-
-import app_gateways.LoanBrokerAppGateway;
-import models.bank.*;
-import models.messaging.RequestReply;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 public class ABN_AMRO extends JFrame {
 
